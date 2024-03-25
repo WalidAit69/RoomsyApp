@@ -1,31 +1,78 @@
-import { StyleSheet } from 'react-native';
+import { SafeAreaView, FlatList, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Stack } from "expo-router";
+import ExploreHeader from "@/components/explore/ExploreHeader";
+import PlacesLg from "@/components/explore/PlacesLg";
+import axios from "axios";
+import PlacesMap from "@/components/explore/PlacesMap";
+import PlacesBottomSheet from "@/components/explore/PlacesBottomSheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+const Page = () => {
+  const [category, setcategory] = useState("All");
+  const [FadeRight, setFadeRight] = useState(false);
+  const [AllPlaces, setAllPlaces] = useState();
+  const [PlacesByCat, setPlacesByCat] = useState();
 
-export default function TabOneScreen() {
+  const getPlaces = async () => {
+    try {
+      const { data } = await axios.get(
+        "https://roomsy-v3-server.vercel.app/api/places"
+      );
+      setAllPlaces(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getPlacesByCategory = async () => {
+    try {
+      const { data } = await axios.get(
+        `https://roomsy-v3-server.vercel.app/api/placesByType/${category}`
+      );
+      setPlacesByCat(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onCategoryChanged = (category: string) => {
+    setcategory(category);
+  };
+
+  useEffect(() => {
+    getPlacesByCategory();
+  }, [category]);
+
+  useEffect(() => {
+    getPlaces();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
-  );
-}
+    <GestureHandlerRootView>
+      <SafeAreaView>
+        <Stack.Screen
+          options={{
+            header: () => (
+              <ExploreHeader
+                onCategoryChanged={onCategoryChanged}
+                setFadeRight={setFadeRight}
+              />
+            ),
+          }}
+        />
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
+        <PlacesMap AllPlaces={AllPlaces} />
+
+        <PlacesBottomSheet
+          AllPlaces={AllPlaces}
+          PlacesByCat={PlacesByCat}
+          category={category}
+          FadeRight
+        />
+      </SafeAreaView>
+    </GestureHandlerRootView>
+  );
+};
+
+export default Page;
