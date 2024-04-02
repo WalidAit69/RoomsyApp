@@ -1,12 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import CustomImage from "../CustomImage";
-import Animated, {
-  FadeInLeft,
-  FadeInRight,
-  FadeOutLeft,
-} from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import Colors from "@/constants/Colors";
 
 interface Place {
   _id: string;
@@ -50,15 +46,7 @@ interface review {
   _id: string;
 }
 
-const PlacesLg = ({
-  place,
-  FadeRight,
-  Loading,
-}: {
-  place: Place;
-  FadeRight: boolean;
-  Loading: boolean;
-}) => {
+const PlaceSmCard = ({ place }: { place: Place }) => {
   const CalculateAverageRating = () => {
     if (!place.reviews || place.reviews.length === 0) {
       return 0;
@@ -75,71 +63,69 @@ const PlacesLg = ({
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Animated.View
-        style={styles.PlaceCard}
-        entering={FadeRight ? FadeInLeft : FadeInRight}
-        exiting={FadeOutLeft}
+    <View style={styles.CardContainer}>
+      <TouchableOpacity
+        style={styles.image}
+        onPress={() => {
+          router.push(`/listing/${place._id}`);
+        }}
       >
-        <TouchableOpacity
-          style={{ position: "relative" }}
-          onPress={() => router.push(`/listing/${place._id}`)}
-        >
-          <CustomImage
-            source={place?.images[0]}
-            style={styles.PlaceCardImg}
-            resizeMode="cover"
-          />
-          <View style={styles.ratingcontainer}>
-            <Text style={styles.rating}>{PlaceRating}</Text>
-          </View>
-        </TouchableOpacity>
-
-        <View style={{ gap: 3 }}>
-          <Text numberOfLines={1} style={styles.title}>
-            {place?.title}
-          </Text>
-          <Text style={styles.location}>
-            {place?.city},{place.country}
-          </Text>
-          <Text style={styles.type}>
-            {place.type} · {place.bedrooms} Bedrooms · {place.bathrooms}{" "}
-            Bathrooms
-          </Text>
-
-          <Text style={styles.price}>${place.price}/night</Text>
+        <CustomImage
+          source={place?.images[0]}
+          style={styles.PlaceCardImg}
+          resizeMode="cover"
+        />
+        <View style={styles.ratingcontainer}>
+          <Text style={styles.rating}>{PlaceRating}</Text>
         </View>
-      </Animated.View>
+      </TouchableOpacity>
+
+      <Text numberOfLines={1} style={styles.title}>
+        {place?.title}
+      </Text>
+
+      <Text style={styles.typelocation}>
+        {place.type} in {place.city}
+      </Text>
+      <Text style={styles.type}>
+        {place.bedrooms} bed · {place.bathrooms} bath
+      </Text>
+      <Text style={styles.price}>${place.price}/night</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
+  CardContainer: {
+    width: 280,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#b4b4b4",
+    padding: 10,
+    marginLeft: 15,
+    marginTop: 20,
   },
-  PlaceCard: {
-    marginTop: 0,
-    width: "95%",
+  image: {
+    width: "100%",
+    height: 170,
   },
   PlaceCardImg: {
     width: "100%",
-    height: 300,
-    borderRadius: 10,
+    height: "100%",
+    borderRadius: 7,
   },
   title: {
     fontFamily: "popSemibold",
-    fontSize: 18,
+    fontSize: 16,
     marginTop: 5,
-  },
-  location: {
-    fontFamily: "popMedium",
-    opacity: 0.8,
-    fontSize: 15,
   },
   type: {
     fontFamily: "popMedium",
     opacity: 0.6,
+    marginTop: 5,
+  },
+  typelocation: {
+    fontFamily: "popRegular",
   },
   price: {
     fontFamily: "popMedium",
@@ -162,4 +148,5 @@ const styles = StyleSheet.create({
     fontFamily: "popRegular",
   },
 });
-export default PlacesLg;
+
+export default PlaceSmCard;

@@ -11,6 +11,7 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { AntDesign, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import Colors from "@/constants/Colors";
 
 const categories = [
   {
@@ -148,6 +149,7 @@ const ExploreHeader = ({ onCategoryChanged, setFadeRight }: Props) => {
 const styles = StyleSheet.create({
   container: {
     marginTop: Platform.OS === "ios" ? 0 : 30,
+    backgroundColor: "white",
   },
   actionRow: {
     flexDirection: "row",
@@ -161,9 +163,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   actionBtn: {
-    backgroundColor: "white",
+    backgroundColor: "#F3F3F4",
     marginHorizontal: 20,
     borderRadius: 40,
+    marginTop: 10,
+    elevation: 0.5,
   },
   categoryBtn: {
     alignItems: "center",

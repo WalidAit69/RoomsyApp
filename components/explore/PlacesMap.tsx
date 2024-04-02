@@ -1,4 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
@@ -80,7 +86,7 @@ const PlacesMap = ({ AllPlaces }: any) => {
       try {
         const addressString = `${place.address}, ${place.city}, ${place.country}`;
         const location = await Location.geocodeAsync(addressString);
-        if (location.length > 0) {
+        if (location && location.length > 0 && location[0]) {
           updatedPlaces.push({
             ...place,
             latitude: location[0].latitude,
@@ -99,7 +105,6 @@ const PlacesMap = ({ AllPlaces }: any) => {
   }, [AllPlaces]);
 
   const onMarkerSelected = (event: Place) => {
-    // console.log(event);
     router.push(`/places`);
   };
 
@@ -125,8 +130,8 @@ const PlacesMap = ({ AllPlaces }: any) => {
               key={place._id}
               onPress={() => onMarkerSelected(place)}
               coordinate={{
-                latitude: place.latitude,
-                longitude: place.longitude,
+                latitude: place?.latitude,
+                longitude: place?.longitude,
               }}
             >
               <View style={styles.marker}>
@@ -135,14 +140,14 @@ const PlacesMap = ({ AllPlaces }: any) => {
             </Marker>
           ))}
 
-        <View>
+        {Platform.OS === "ios" && (
           <TouchableOpacity
-            style={styles.LocationBtn}
             onPress={onLocationClicked}
+            style={styles.LocationBtn}
           >
             <FontAwesome6 name="location-arrow" size={22} color="black" />
           </TouchableOpacity>
-        </View>
+        )}
       </MapView>
     </View>
   );
@@ -175,15 +180,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   LocationBtn: {
-    position: "absolute",
-    top: 20,
-    right: 20,
     alignItems: "center",
     justifyContent: "center",
     width: 40,
     height: 40,
     backgroundColor: "white",
     borderRadius: 10,
+    marginTop: 10,
+    marginLeft: 10,
   },
 });
 export default PlacesMap;

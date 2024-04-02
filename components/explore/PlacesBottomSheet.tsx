@@ -4,6 +4,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import PlacesLg from "./PlacesLg";
@@ -45,6 +46,7 @@ interface Props {
   PlacesByCat: Place[] | undefined;
   category: string;
   FadeRight: boolean;
+  Loading: boolean;
 }
 
 const PlacesBottomSheet = ({
@@ -52,6 +54,7 @@ const PlacesBottomSheet = ({
   PlacesByCat,
   category,
   FadeRight,
+  Loading,
 }: Props) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["10%", "100%"], []);
@@ -76,37 +79,65 @@ const PlacesBottomSheet = ({
       handleIndicatorStyle={{ backgroundColor: "#cacaca" }}
       index={1}
       style={styles.sheetContainer}
-      backgroundStyle={{ backgroundColor: Colors.backgoundcolor }}
+      backgroundStyle={{ backgroundColor: "white" }}
     >
-      <View style={{ marginTop: 0 }}>
+      <View style={{ marginBottom: 0 }}>
         {category === "All" ? (
-          <FlatList
-            ref={listRef}
-            data={AllPlaces}
-            renderItem={(place) => (
-              <PlacesLg place={place.item} FadeRight={FadeRight} />
+          <>
+            {AllPlaces && AllPlaces?.length > 0 ? (
+              <FlatList
+                ref={listRef}
+                data={AllPlaces}
+                renderItem={(place) => (
+                  <PlacesLg
+                    place={place.item}
+                    FadeRight={FadeRight}
+                    Loading={Loading}
+                  />
+                )}
+                keyExtractor={(place) => place._id}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ gap: 40 }}
+                ListHeaderComponent={
+                  <Text style={styles.info}>{AllPlaces?.length} Places</Text>
+                }
+              />
+            ) : (
+              <ActivityIndicator
+                size={"large"}
+                color={Colors.maincolor}
+                style={{ marginTop: 50 }}
+              />
             )}
-            keyExtractor={(place) => place._id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 40 }}
-            ListHeaderComponent={
-              <Text style={styles.info}>{AllPlaces?.length} Places</Text>
-            }
-          />
+          </>
         ) : (
-          <FlatList
-            ref={listRef}
-            data={PlacesByCat}
-            renderItem={(place) => (
-              <PlacesLg place={place.item} FadeRight={FadeRight} />
+          <>
+            {PlacesByCat && PlacesByCat.length > 0 ? (
+              <FlatList
+                ref={listRef}
+                data={PlacesByCat}
+                renderItem={(place) => (
+                  <PlacesLg
+                    place={place.item}
+                    FadeRight={FadeRight}
+                    Loading={Loading}
+                  />
+                )}
+                keyExtractor={(place) => place._id}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ gap: 40 }}
+                ListHeaderComponent={
+                  <Text style={styles.info}>{PlacesByCat?.length} Places</Text>
+                }
+              />
+            ) : (
+              <ActivityIndicator
+                size={"large"}
+                color={Colors.maincolor}
+                style={{ marginTop: 50 }}
+              />
             )}
-            keyExtractor={(place) => place._id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 40 }}
-            ListHeaderComponent={
-              <Text style={styles.info}>{PlacesByCat?.length} Places</Text>
-            }
-          />
+          </>
         )}
       </View>
 
@@ -144,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sheetContainer: {
-    backgroundColor: Colors.backgoundcolor,
+    backgroundColor: "white",
     elevation: 4,
     shadowColor: "black",
     shadowOpacity: 0.3,
