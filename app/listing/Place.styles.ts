@@ -152,8 +152,8 @@ export const styles = StyleSheet.create({
     fontSize: 17,
   },
   arrangementCard: {
-    height: 120,
-    width: 140,
+    height: 140,
+    width: 160,
     borderWidth: 1,
     borderColor: Colors.bordercolor,
     justifyContent: "center",
@@ -252,5 +252,32 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginHorizontal: 5,
     rowGap: 5,
+  },
+  modalContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    flex: 1,
+  },
+  modal: {
+    backgroundColor: Colors.backgoundcolor,
+    padding: 15,
+    width: "90%",
+    maxHeight: "95%",
+    borderRadius: 10,
+  },
+  modaltext: {
+    fontFamily: "popMedium",
+    fontSize: 15,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    backgroundColor: "white",
+    height: 40,
+    width: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-end",
   },
 });

@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   FlatList,
   Share,
+  Modal,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -33,6 +34,8 @@ import Animated, {
   useAnimatedStyle,
   useScrollViewOffset,
 } from "react-native-reanimated";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import UseToast from "@/widgets/Toast";
 
 interface Place {
   _id: string;
@@ -76,6 +79,10 @@ interface review {
   _id: string;
 }
 
+interface UserData {
+  userId: string;
+}
+
 const Page = () => {
   const IMG_HEIGHT = 500;
 
@@ -88,6 +95,19 @@ const Page = () => {
 
   const [Place, setPlace] = useState<Place>();
   const [AllPlaces, setAllPlaces] = useState<Place[]>();
+  const [UserData, setUserData] = useState<UserData>();
+  const [isLiked, setisLiked] = useState(false);
+  const like = Place?.likedBy;
+
+  const getUserData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("user_session");
+      const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+      setUserData(data);
+    } catch (error) {
+      console.log("Error getting data:", error);
+    }
+  };
 
   const GetPlace = async () => {
     try {
@@ -121,6 +141,7 @@ const Page = () => {
   useEffect(() => {
     GetPlace();
     GetAllPlaces();
+    getUserData();
   }, []);
 
   useEffect(() => {
@@ -193,6 +214,50 @@ const Page = () => {
     }
   };
 
+  const handleLikeClick = async () => {
+    if (UserData?.userId) {
+      try {
+        setisLiked(!isLiked);
+        const { data } = await axios.post(
+          `https://roomsy-v3-server.vercel.app/api/save/${id}/${UserData?.userId}`
+        );
+      } catch (error) {
+        UseToast({ msg: "Unknown error" || "Unknown error" });
+      }
+    } else {
+      UseToast({ msg: "Please log in first" || "Please log in first" });
+    }
+  };
+
+  const handleLike = async () => {
+    if (
+      Place?.likedBy &&
+      UserData &&
+      Place?.likedBy.includes(UserData?.userId)
+    ) {
+      setisLiked(true);
+    } else {
+      setisLiked(false);
+    }
+  };
+
+  useEffect(() => {
+    handleLike();
+  }, [like]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isDescription, setisDescription] = useState(true);
+
+  const toggleDescModal = () => {
+    setisDescription(true);
+    setModalVisible(!modalVisible);
+  };
+
+  const toggleLocModal = () => {
+    setisDescription(false);
+    setModalVisible(!modalVisible);
+  };
+
   return (
     <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
       <Stack.Screen
@@ -216,9 +281,18 @@ const Page = () => {
                 <Text style={styles.headerrightText}>Share</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.headerright}>
-                <AntDesign name="hearto" size={20} color="black" />
-                <Text style={styles.headerrightText}>Like</Text>
+              <TouchableOpacity
+                style={styles.headerright}
+                onPress={handleLikeClick}
+              >
+                {!isLiked ? (
+                  <AntDesign name="hearto" size={20} color="black" />
+                ) : (
+                  <AntDesign name="heart" size={20} color={Colors.maincolor} />
+                )}
+                <Text style={styles.headerrightText}>
+                  {!isLiked ? "Like" : "Liked"}
+                </Text>
               </TouchableOpacity>
             </View>
           ),
@@ -388,7 +462,10 @@ const Page = () => {
                 <Text numberOfLines={5} style={styles.descriptiontext}>
                   {Place.description}
                 </Text>
-                <TouchableOpacity style={styles.descriptionbtn}>
+                <TouchableOpacity
+                  style={styles.descriptionbtn}
+                  onPress={toggleDescModal}
+                >
                   <Text style={styles.descriptionbtntext}>Show more</Text>
                   <Feather name="chevron-right" size={14} color="black" />
                 </TouchableOpacity>
@@ -662,7 +739,10 @@ const Page = () => {
                     </Text>
 
                     {Place.extrainfo.length > 200 && (
-                      <TouchableOpacity style={styles.descriptionbtn}>
+                      <TouchableOpacity
+                        style={styles.descriptionbtn}
+                        onPress={toggleLocModal}
+                      >
                         <Text style={styles.descriptionbtntext}>Show more</Text>
                         <Feather name="chevron-right" size={14} color="black" />
                       </TouchableOpacity>
@@ -688,6 +768,30 @@ const Page = () => {
                 showsHorizontalScrollIndicator={false}
               />
             </View>
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={toggleDescModal}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modal}>
+                  <TouchableOpacity
+                    onPress={toggleDescModal}
+                    style={styles.closeButtonText}
+                  >
+                    <AntDesign name="close" size={24} color="black" />
+                  </TouchableOpacity>
+
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <Text style={styles.modaltext}>
+                      {isDescription ? Place.description : Place?.extrainfo}
+                    </Text>
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
           </View>
         </View>
       ) : (

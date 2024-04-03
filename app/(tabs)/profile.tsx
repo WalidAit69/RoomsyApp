@@ -15,7 +15,7 @@ import axios from "axios";
 import styles from "@/components/profile/profile.styles";
 import { formatDistanceToNow } from "date-fns";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import PlaceCard from "@/components/PlaceCard";
+import PlaceCard from "@/components/profile/PlaceCard";
 import Colors from "@/constants/Colors";
 
 interface User {
@@ -362,7 +362,7 @@ const Page = () => {
               {Array.isArray(UserPlaces) && UserPlaces.length > 0 ? (
                 <FlatList
                   data={UserPlaces}
-                  renderItem={(place) => <PlaceCard place={place} />}
+                  renderItem={(place) => <PlaceCard place={place.item} />}
                   keyExtractor={(place) => place._id}
                   contentContainerStyle={{ columnGap: 10 }}
                   style={{ width: "90%" }}
@@ -382,7 +382,7 @@ const Page = () => {
               {UserLikes && Array.isArray(UserLikes) ? (
                 <FlatList
                   data={UserLikes}
-                  renderItem={(place) => <PlaceCard place={place} />}
+                  renderItem={(place) => <PlaceCard place={place.item} />}
                   keyExtractor={(place) => place._id}
                   contentContainerStyle={{ columnGap: 10 }}
                   style={{ width: "90%", marginBottom: 10 }}

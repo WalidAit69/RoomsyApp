@@ -1,10 +1,12 @@
+import ModalHeaderText from "@/components/explore/ModalHeaderText";
+import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { TouchableOpacity } from "react-native";
-import { RootSiblingParent } from 'react-native-root-siblings';
+import { Platform, TouchableOpacity } from "react-native";
+import { RootSiblingParent } from "react-native-root-siblings";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -65,14 +67,24 @@ function RootLayoutNav() {
           options={{
             presentation: "transparentModal",
             animation: "fade",
-            headerTitleStyle: {
-              fontFamily: "popRegular",
-            },
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => router.back()}>
-                <Ionicons name="close-outline" size={24} color="black" />
-              </TouchableOpacity>
-            ),
+            headerTransparent: true,
+            headerTitle: () => <ModalHeaderText />,
+            headerLeft: () =>
+              Platform.OS === "ios" && (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#fff",
+                    borderColor: Colors.bordercolor,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    padding: 5,
+                  }}
+                  onPress={() => router.back()}
+                >
+                  <Ionicons name="close-outline" size={24} color="black" />
+                </TouchableOpacity>
+              ),
+            headerTitleAlign: "center",
           }}
         />
       </Stack>
