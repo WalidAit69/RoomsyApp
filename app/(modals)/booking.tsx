@@ -6,27 +6,25 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import { BlurView } from "expo-blur";
 import { AntDesign } from "@expo/vector-icons";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 import Colors from "@/constants/Colors";
 import { places } from "@/assets/data/places";
 import { Dropdown } from "react-native-element-dropdown";
 import useCountries from "@/hooks/useCountries";
+import UseToast from "@/widgets/Toast";
 
 //@ts-ignore
 import DatePicker from "react-native-modern-datepicker";
-import UseToast from "@/widgets/Toast";
-import axios from "axios";
 
 const booking = () => {
-  const navigation = useNavigation();
   const router = useRouter();
   const [openCard, setopenCard] = useState(0);
-
   const AnimatedTouchableOpacity =
     Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -80,6 +78,8 @@ const booking = () => {
     }
   };
 
+  //sending data
+  const [isLoading, setisLoading] = useState(false);
   const onClear = () => {
     setselectedPlace(0);
     setSelectedCountry("");
@@ -91,18 +91,15 @@ const booking = () => {
     setinfants(0);
     setShowCalendar(false);
   };
-
-  const [isLoading, setisLoading] = useState(false);
-
   const onSearch = async () => {
     if (selectedCountry && Checkin && Checkout && guests) {
       try {
         setisLoading(true);
-        const { data } = await axios.get(
-          `https://roomsy-v3-server.vercel.app/api/placesBySearch/${selectedCountry}/${Checkin}/${Checkout}/${guests}`
-        );
-        console.log(data);
-        router.push("/(modals)/placesearch");
+
+        router.push({
+          pathname: "/(modals)/placesearch",
+          params: { selectedCountry, Checkin, Checkout, guests },
+        });
       } catch (error) {
         console.log(error);
       } finally {
@@ -467,7 +464,10 @@ const booking = () => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator size={"large"} color={Colors.mainlightcolor} />
+              <ActivityIndicator
+                size={Platform.OS === "ios" ? "small" : 30}
+                color={Colors.mainlightcolor}
+              />
             ) : (
               <>
                 <AntDesign

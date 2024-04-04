@@ -56,8 +56,8 @@ const PlacesLg = ({
   Loading,
 }: {
   place: Place;
-  FadeRight: boolean;
-  Loading: boolean;
+  FadeRight?: boolean;
+  Loading?: boolean;
 }) => {
   const CalculateAverageRating = () => {
     if (!place.reviews || place.reviews.length === 0) {
