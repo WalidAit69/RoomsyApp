@@ -87,6 +87,13 @@ function RootLayoutNav() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen
+          name="(modals)/placesearch"
+          options={{
+            presentation: "modal",
+            animation: "fade",
+          }}
+        />
       </Stack>
     </RootSiblingParent>
   );

@@ -3,39 +3,63 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import { BlurView } from "expo-blur";
 import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 import Colors from "@/constants/Colors";
 import { places } from "@/assets/data/places";
-import { format } from "date-fns";
+import { Dropdown } from "react-native-element-dropdown";
+import useCountries from "@/hooks/useCountries";
 
 //@ts-ignore
 import DatePicker from "react-native-modern-datepicker";
+import UseToast from "@/widgets/Toast";
+import axios from "axios";
 
 const booking = () => {
+  const navigation = useNavigation();
   const router = useRouter();
-  const today = new Date().toISOString().substring(0, 10);
   const [openCard, setopenCard] = useState(0);
-  const [selectedPlace, setselectedPlace] = useState(0);
 
+  const AnimatedTouchableOpacity =
+    Animated.createAnimatedComponent(TouchableOpacity);
+
+  //Countries
+  const countries = useCountries().getAll();
+  const [isFocus, setIsFocus] = useState(false);
+  const [selectedPlace, setselectedPlace] = useState(0);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const renderLabel = () => {
+    if (selectedCountry || isFocus) {
+      return (
+        <Text style={[styles.label, isFocus && { color: Colors.maincolor }]}>
+          Select country
+        </Text>
+      );
+    }
+    return null;
+  };
+  const handleLocationClick = (index: number, title: string) => {
+    setselectedPlace(index);
+    setSelectedCountry(title);
+  };
+
+  //Check in/out
   const [ShowCalendar, setShowCalendar] = useState(false);
   const [Checkin, setCheckin] = useState();
   const [Checkout, setCheckout] = useState();
-
+  const today = new Date().toISOString().substring(0, 10);
   const [nextDay, setnextDay] = useState(new Date());
-
   const handlecheckinClick = () => {
     setShowCalendar(false);
     setCheckout(undefined);
   };
-
   const handlecheckoutClick = () => {
     setShowCalendar(true);
     if (Checkin) {
@@ -45,15 +69,49 @@ const booking = () => {
     }
   };
 
-  const onClear = () => {
-    setselectedPlace(0);
-    setopenCard(0);
+  // Guests
+  const [adults, setadults] = useState(1);
+  const [childrens, setchildrens] = useState(0);
+  const [infants, setinfants] = useState(0);
+  const guests = adults + childrens + infants;
+  const handleAdultsMinusClick = () => {
+    if (adults > 1) {
+      setadults(adults - 1);
+    }
   };
 
-  const onSearch = () => {};
+  const onClear = () => {
+    setselectedPlace(0);
+    setSelectedCountry("");
+    setopenCard(0);
+    setCheckin(undefined);
+    setCheckout(undefined);
+    setadults(1);
+    setchildrens(0);
+    setinfants(0);
+    setShowCalendar(false);
+  };
 
-  const AnimatedTouchableOpacity =
-    Animated.createAnimatedComponent(TouchableOpacity);
+  const [isLoading, setisLoading] = useState(false);
+
+  const onSearch = async () => {
+    if (selectedCountry && Checkin && Checkout && guests) {
+      try {
+        setisLoading(true);
+        const { data } = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/placesBySearch/${selectedCountry}/${Checkin}/${Checkout}/${guests}`
+        );
+        console.log(data);
+        router.push("/(modals)/placesearch");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setisLoading(false);
+      }
+    } else {
+      UseToast({ msg: "Please fill all fields" });
+    }
+  };
 
   return (
     <BlurView
@@ -90,8 +148,30 @@ const booking = () => {
                 style={styles.cardBody}
               >
                 <View style={styles.searchSection}>
-                  <AntDesign name="search1" size={17} color="black" />
-                  <TextInput placeholder="Search" style={styles.dropdown} />
+                  {renderLabel()}
+                  <Dropdown
+                    style={[
+                      styles.dropdown,
+                      isFocus && { borderColor: Colors.maincolor },
+                    ]}
+                    placeholder={!isFocus ? "Select country" : "..."}
+                    data={countries}
+                    value={selectedCountry}
+                    labelField="label"
+                    valueField="value"
+                    onChange={(item) => {
+                      setSelectedCountry(item.value);
+                      setIsFocus(false);
+                      setselectedPlace(0);
+                    }}
+                    search
+                    searchPlaceholder="Search..."
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    inputSearchStyle={styles.inputSearchStyle}
+                  />
                 </View>
               </Animated.View>
 
@@ -108,7 +188,7 @@ const booking = () => {
                   <AnimatedTouchableOpacity
                     entering={FadeIn.delay(400)}
                     key={index}
-                    onPress={() => setselectedPlace(index)}
+                    onPress={() => handleLocationClick(index, place.title)}
                   >
                     <Image
                       source={place.img}
@@ -156,7 +236,10 @@ const booking = () => {
                 When's your trip ?
               </Animated.Text>
 
-              <Animated.View style={styles.cardBody}>
+              <Animated.View
+                entering={FadeIn.delay(300)}
+                style={styles.cardBody}
+              >
                 {!ShowCalendar && (
                   <DatePicker
                     options={{
@@ -193,13 +276,16 @@ const booking = () => {
                 )}
 
                 {Checkin && (
-                  <View style={{ gap: 10 }}>
+                  <Animated.View
+                    entering={FadeIn.delay(200)}
+                    style={{ gap: 10 }}
+                  >
                     <TouchableOpacity
                       onPress={handlecheckinClick}
                       style={
                         !ShowCalendar
                           ? styles.searchSectionActive
-                          : styles.searchSection
+                          : styles.searchSectionNoActive
                       }
                     >
                       <Text style={styles.searchSectionText}>{Checkin}</Text>
@@ -210,7 +296,7 @@ const booking = () => {
                       style={
                         ShowCalendar
                           ? styles.searchSectionActive
-                          : styles.searchSection
+                          : styles.searchSectionNoActive
                       }
                     >
                       {Checkout ? (
@@ -223,7 +309,7 @@ const booking = () => {
                         </Text>
                       )}
                     </TouchableOpacity>
-                  </View>
+                  </Animated.View>
                 )}
               </Animated.View>
             </Animated.View>
@@ -251,6 +337,105 @@ const booking = () => {
               >
                 Who's coming ?
               </Animated.Text>
+
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Animated.View
+                  entering={FadeIn.delay(200)}
+                  style={styles.guestcontainer}
+                >
+                  <View style={styles.guests}>
+                    <Text style={styles.guestText}>Adults</Text>
+                    <Text style={styles.guestDesc}>Ages 13 or above</Text>
+                  </View>
+
+                  <View style={styles.guestnumbercountainer}>
+                    <TouchableOpacity
+                      disabled={adults === 1}
+                      style={adults === 1 ? styles.icon : styles.iconActive}
+                      onPress={handleAdultsMinusClick}
+                    >
+                      <AntDesign name="minus" size={15} color="black" />
+                    </TouchableOpacity>
+
+                    <Text style={styles.guestnumber}>{adults}</Text>
+
+                    <TouchableOpacity
+                      style={styles.iconActive}
+                      onPress={() => {
+                        setadults(adults + 1);
+                      }}
+                    >
+                      <AntDesign name="plus" size={15} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+
+                <Animated.View
+                  entering={FadeIn.delay(300)}
+                  style={styles.guestcontainer}
+                >
+                  <View style={styles.guests}>
+                    <Text style={styles.guestText}>Children</Text>
+                    <Text style={styles.guestDesc}>Ages 2-12</Text>
+                  </View>
+
+                  <View style={styles.guestnumbercountainer}>
+                    <TouchableOpacity
+                      disabled={childrens === 0}
+                      style={childrens === 0 ? styles.icon : styles.iconActive}
+                      onPress={() => {
+                        setchildrens(childrens - 1);
+                      }}
+                    >
+                      <AntDesign name="minus" size={15} color="black" />
+                    </TouchableOpacity>
+
+                    <Text style={styles.guestnumber}>{childrens}</Text>
+
+                    <TouchableOpacity
+                      style={styles.iconActive}
+                      onPress={() => {
+                        setchildrens(childrens + 1);
+                      }}
+                    >
+                      <AntDesign name="plus" size={15} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+
+                <Animated.View
+                  entering={FadeIn.delay(400)}
+                  style={[styles.guestcontainer, { borderBottomWidth: 0 }]}
+                >
+                  <View style={styles.guests}>
+                    <Text style={styles.guestText}>Infants</Text>
+                    <Text style={styles.guestDesc}>Under 2</Text>
+                  </View>
+
+                  <View style={styles.guestnumbercountainer}>
+                    <TouchableOpacity
+                      disabled={infants === 0}
+                      style={infants === 0 ? styles.icon : styles.iconActive}
+                      onPress={() => {
+                        setinfants(infants - 1);
+                      }}
+                    >
+                      <AntDesign name="minus" size={15} color="black" />
+                    </TouchableOpacity>
+
+                    <Text style={styles.guestnumber}>{infants}</Text>
+
+                    <TouchableOpacity
+                      style={styles.iconActive}
+                      onPress={() => {
+                        setinfants(infants + 1);
+                      }}
+                    >
+                      <AntDesign name="plus" size={15} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                </Animated.View>
+              </View>
             </Animated.View>
           )}
         </View>
@@ -276,14 +461,24 @@ const booking = () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onSearch} style={styles.btn}>
-            <AntDesign
-              name="search1"
-              size={20}
-              color="white"
-              style={{ marginBottom: 2 }}
-            />
-            <Text style={styles.btntext}>Search</Text>
+          <TouchableOpacity
+            onPress={onSearch}
+            style={styles.btn}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size={"large"} color={Colors.mainlightcolor} />
+            ) : (
+              <>
+                <AntDesign
+                  name="search1"
+                  size={20}
+                  color="white"
+                  style={{ marginBottom: 2 }}
+                />
+                <Text style={styles.btntext}>Search</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -310,9 +505,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 3,
     backgroundColor: Colors.maincolor,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
     borderRadius: 5,
+    width: 130,
+    height: 55,
+    justifyContent: "center",
   },
   btntext: {
     color: "#fff",
@@ -359,20 +555,17 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   searchSection: {
-    height: 60,
-    flexDirection: "row",
-    borderColor: Colors.bordercolor,
-    borderWidth: 1,
-    alignItems: "center",
-    gap: 10,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    paddingLeft: 20,
+    backgroundColor: "white",
   },
   dropdown: {
+    minHeight: 60,
+    height: "auto",
+    borderColor: Colors.bordercolor,
+    borderWidth: 0.5,
+    borderRadius: 8,
     flex: 1,
-    height: "100%",
     fontFamily: "popMedium",
+    paddingHorizontal: 20,
   },
   place: {
     width: 120,
@@ -396,6 +589,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 1,
   },
+  searchSectionNoActive: {
+    height: 60,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    paddingLeft: 20,
+  },
   searchSectionActive: {
     height: 60,
     flexDirection: "row",
@@ -410,6 +612,82 @@ const styles = StyleSheet.create({
   searchSectionText: {
     fontFamily: "popMedium",
     fontSize: 14,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "white",
+    left: 22,
+    top: -10,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 13,
+    fontFamily: "popRegular",
+    color: Colors.bordercolor,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    fontFamily: "popRegular",
+    opacity: 0.5,
+  },
+  selectedTextStyle: {
+    fontSize: 15,
+    fontFamily: "popMedium",
+  },
+  inputSearchStyle: {
+    height: 45,
+    fontSize: 14,
+    borderRadius: 8,
+    fontFamily: "popRegular",
+  },
+  guestcontainer: {
+    height: 70,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderColor: Colors.backgoundcolor,
+    marginTop: 20,
+    marginBottom: 10,
+    width: "90%",
+  },
+  guests: {
+    gap: 5,
+  },
+  guestText: {
+    fontFamily: "popRegular",
+    fontSize: 15,
+  },
+  guestDesc: {
+    fontFamily: "popRegular",
+    fontSize: 14,
+    opacity: 0.5,
+  },
+  guestnumbercountainer: {
+    flexDirection: "row",
+    gap: 15,
+    alignItems: "center",
+  },
+  guestnumber: {
+    fontFamily: "popMedium",
+    fontSize: 16,
+    marginTop: 5,
+  },
+  iconActive: {
+    borderWidth: 1,
+    borderColor: Colors.bordercolor,
+    padding: 10,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  icon: {
+    borderWidth: 1,
+    borderColor: Colors.bordercolor,
+    padding: 10,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.3,
   },
 });
 

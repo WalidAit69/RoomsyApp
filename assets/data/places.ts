@@ -12,7 +12,7 @@ export const places = [
     img: require('@/assets/data/world-2.png'),
   },
   {
-    title: 'Middle East',
+    title: 'Egypt',
     img: require('@/assets/data/world-3.png'),
   },
   {
@@ -20,7 +20,7 @@ export const places = [
     img: require('@/assets/data/world-4.png'),
   },
   {
-    title: 'Southeast Asia',
+    title: 'Philippines',
     img: require('@/assets/data/world-5.png'),
   },
 ];

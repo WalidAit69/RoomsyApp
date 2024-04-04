@@ -42,6 +42,7 @@
     "react-native": "0.73.6",
     "react-native-country-codes-picker": "^2.3.5",
     "react-native-dotenv": "^3.4.11",
+    "react-native-element-dropdown": "^2.10.4",
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-gesture-handler": "^2.14.0",
     "react-native-image-picker": "^7.1.1",
