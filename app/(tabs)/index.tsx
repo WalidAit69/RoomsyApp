@@ -13,7 +13,10 @@ const Page = () => {
   const [AllPlaces, setAllPlaces] = useState();
   const [PlacesByCat, setPlacesByCat] = useState();
   const [Loading, setLoading] = useState(false);
+  const [NumberofPlaces, setNumberofPlaces] = useState(0);
+  const [SlicedPlaces, setSlicedPlaces] = useState();
 
+  // get all places
   const getPlaces = async () => {
     try {
       setLoading(true);
@@ -21,6 +24,8 @@ const Page = () => {
         "https://roomsy-v3-server.vercel.app/api/places"
       );
       setAllPlaces(data);
+      setSlicedPlaces(data.slice(0, 5));
+      setNumberofPlaces(data.length);
     } catch (error) {
       console.log(error);
     } finally {
@@ -28,6 +33,7 @@ const Page = () => {
     }
   };
 
+  // get places by category
   const getPlacesByCategory = async () => {
     try {
       setLoading(true);
@@ -42,6 +48,7 @@ const Page = () => {
     }
   };
 
+  // handle category change
   const onCategoryChanged = (category: string) => {
     setcategory(category);
   };
@@ -71,10 +78,12 @@ const Page = () => {
         <PlacesMap AllPlaces={AllPlaces} />
 
         <PlacesBottomSheet
-          AllPlaces={AllPlaces}
           PlacesByCat={PlacesByCat}
           category={category}
           FadeRight={FadeRight}
+          NumberofPlaces={NumberofPlaces}
+          AllPlaces={SlicedPlaces}
+          setAllPlaces={setSlicedPlaces}
           Loading={Loading}
         />
       </SafeAreaView>

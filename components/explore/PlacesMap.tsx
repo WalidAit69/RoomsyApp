@@ -1,10 +1,4 @@
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
@@ -50,39 +44,44 @@ interface Place {
   longitude: number;
 }
 
-const PlacesMap = ({ AllPlaces }: any) => {
-  const [errorMsg, setErrorMsg] = useState("");
-  const [initialRegion, setinitialRegion] = useState<InitialRegion>();
+const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | undefined }) => {
+  // refs
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
+
+  // data
+  const [errorMsg, setErrorMsg] = useState("");
+  const [initialRegion, setinitialRegion] = useState<InitialRegion>();
   const [SelectedPlace, setSelectedPlace] = useState<Place>();
 
-  const getCurrentLocation = async () => {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      const initialRegion = {
-        latitude: location ? location?.coords.latitude : 33.58831,
-        longitude: location ? location?.coords.longitude : -7.61138,
-        latitudeDelta: 0.1,
-        longitudeDelta: 0.1,
-      };
-
-      setinitialRegion(initialRegion);
-    } catch (error) {
-      console.error("Error getting current location:", error);
-    }
-  };
-
+  // Getting user location
   useEffect(() => {
+    const getCurrentLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const initialRegion = {
+          latitude: location ? location?.coords.latitude : 33.58831,
+          longitude: location ? location?.coords.longitude : -7.61138,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        };
+
+        setinitialRegion(initialRegion);
+      } catch (error) {
+        console.error("Error getting current location:", error);
+      }
+    };
+
     getCurrentLocation();
   }, []);
 
+  // handle Location Button
   const onLocationClicked = () => {
     if (initialRegion) {
       mapRef.current?.animateToRegion(initialRegion);
@@ -91,6 +90,7 @@ const PlacesMap = ({ AllPlaces }: any) => {
     }
   };
 
+  // handle marker select
   const onMarkerSelected = (event: Place) => {
     setSelectedPlace(event);
   };

@@ -14,6 +14,7 @@ import axios from "axios";
 import Colors from "@/constants/Colors";
 import PlacesLg from "@/components/explore/PlacesLg";
 import { AntDesign } from "@expo/vector-icons";
+import Searchheader from "@/components/explore/Searchheader";
 
 interface Place {
   _id: string;
@@ -80,12 +81,6 @@ const placesearch = () => {
   useEffect(() => {
     getData();
   }, []);
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const options = { month: "long", day: "numeric" };
-    //@ts-ignore
-    return date.toLocaleDateString("en-US", options);
-  };
 
   // sorting
   const [SortDirection, setSortDirection] = useState("");
@@ -120,37 +115,26 @@ const placesearch = () => {
     <SafeAreaView>
       <Stack.Screen
         options={{
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.headercontainer}
-              onPress={() => router.back()}
-            >
-              <AntDesign
-                name="left"
-                size={15}
-                color="black"
-                style={{ marginBottom: Platform.OS === "android" ? 4 : 0 }}
-              />
-              <Text style={styles.darktext}>{selectedCountry}</Text>
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <View style={styles.headercontainer}>
-              <Text style={styles.lighttext}>
-                {formatDate(Checkin.toString())} ·{" "}
-                {formatDate(Checkout.toString())} · {guests}
-                {+guests > 1 ? " Guests" : " Guest"}
-              </Text>
-            </View>
-          ),
           headerTitle: "",
-          headerStyle: {
-            backgroundColor: Colors.backgoundcolorlight,
-          },
           headerShadowVisible: false,
+          headerTransparent: true,
+          header: () => (
+            <Searchheader
+              selectedCountry={selectedCountry}
+              Checkin={Checkin}
+              Checkout={Checkout}
+              guests={guests}
+            />
+          ),
         }}
       />
-      <ScrollView style={{ backgroundColor: "#fff", height: "100%" }}>
+      <ScrollView
+        style={{
+          height: "100%",
+          backgroundColor: "#fff",
+          marginTop: 30,
+        }}
+      >
         {!Loading ? (
           <View
             style={{
@@ -182,7 +166,10 @@ const placesearch = () => {
                 <Text style={{ fontFamily: "popRegular", opacity: 0.8 }}>
                   Filter by
                 </Text>
-                <TouchableOpacity style={styles.btn} onPress={handleSortClick}>
+                <TouchableOpacity
+                  style={!SortDirection ? styles.btn : styles.btnactive}
+                  onPress={handleSortClick}
+                >
                   <Text
                     style={[styles.darktext, { fontSize: 12, marginTop: 1 }]}
                   >
@@ -250,6 +237,17 @@ const styles = StyleSheet.create({
   btn: {
     borderWidth: 1,
     borderColor: Colors.backgoundcolor,
+    borderRadius: 7,
+    width: 85,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  btnactive: {
+    borderWidth: 1,
+    borderColor: "#000",
     borderRadius: 7,
     width: 85,
     paddingVertical: 12,

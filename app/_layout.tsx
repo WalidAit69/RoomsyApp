@@ -49,7 +49,6 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const router = useRouter();
   return (
     <RootSiblingParent>
       <Stack>
@@ -61,36 +60,13 @@ function RootLayoutNav() {
             headerShown: false,
           }}
         />
+
         <Stack.Screen name="listing/[id]" options={{ headerTitle: "" }} />
+
         <Stack.Screen
           name="(modals)/booking"
           options={{
             presentation: "transparentModal",
-            animation: "fade",
-            headerTransparent: true,
-            headerTitle: () => <ModalHeaderText />,
-            headerLeft: () =>
-              Platform.OS === "ios" && (
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#fff",
-                    borderColor: Colors.bordercolor,
-                    borderRadius: 20,
-                    borderWidth: 1,
-                    padding: 5,
-                  }}
-                  onPress={() => router.back()}
-                >
-                  <Ionicons name="close-outline" size={24} color="black" />
-                </TouchableOpacity>
-              ),
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="(modals)/placesearch"
-          options={{
-            presentation: "modal",
             animation: "fade",
           }}
         />

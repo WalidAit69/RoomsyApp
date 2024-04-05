@@ -7,11 +7,12 @@ import {
   Image,
   ActivityIndicator,
   Platform,
+  SafeAreaView,
 } from "react-native";
 import React, { useState } from "react";
 import { BlurView } from "expo-blur";
-import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 import Colors from "@/constants/Colors";
 import { places } from "@/assets/data/places";
@@ -21,8 +22,10 @@ import UseToast from "@/widgets/Toast";
 
 //@ts-ignore
 import DatePicker from "react-native-modern-datepicker";
+import ModalHeaderText from "@/components/explore/ModalHeaderText";
 
 const booking = () => {
+  // states
   const router = useRouter();
   const [openCard, setopenCard] = useState(0);
   const AnimatedTouchableOpacity =
@@ -96,7 +99,7 @@ const booking = () => {
       try {
         setisLoading(true);
 
-        router.push({
+        router.replace({
           pathname: "/(modals)/placesearch",
           params: { selectedCountry, Checkin, Checkout, guests },
         });
@@ -117,7 +120,32 @@ const booking = () => {
       tint="light"
       style={styles.container}
     >
-      <ScrollView style={{ marginBottom: 120 }}>
+      <Stack.Screen
+        options={{
+          headerShadowVisible: false,
+          headerTitle: () => <ModalHeaderText />,
+          headerLeft: () =>
+            Platform.OS === "ios" && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#fff",
+                  borderColor: Colors.bordercolor,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  padding: 5,
+                }}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="close-outline" size={24} color="black" />
+              </TouchableOpacity>
+            ),
+          headerTitleAlign: "center",
+          headerTransparent : true,
+        }}
+      />
+      <ScrollView
+        style={{ marginBottom: 120 }}
+      >
         {/* Where */}
         <View style={styles.card}>
           {openCard != 0 && (
@@ -163,7 +191,10 @@ const booking = () => {
                     }}
                     search
                     searchPlaceholder="Search..."
-                    onFocus={() => setIsFocus(true)}
+                    onFocus={() => {
+                      setIsFocus(true);
+                      setSelectedCountry("");
+                    }}
                     onBlur={() => setIsFocus(false)}
                     placeholderStyle={styles.placeholderStyle}
                     selectedTextStyle={styles.selectedTextStyle}

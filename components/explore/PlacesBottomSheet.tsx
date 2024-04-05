@@ -1,16 +1,19 @@
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import PlacesLg from "./PlacesLg";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetFlatListMethods,
+} from "@gorhom/bottom-sheet";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
 
 interface Place {
   _id: string;
@@ -39,38 +42,82 @@ interface Place {
   likedBy: string[];
   latitude: number;
   longitude: number;
+  reviews: review[];
 }
 
+interface review {
+  comment: string;
+  rating: number;
+  userId: string;
+  userName: string;
+  userPhoto: string;
+  _id: string;
+}
 interface Props {
-  AllPlaces: Place[] | undefined;
   PlacesByCat: Place[] | undefined;
   category: string;
   FadeRight: boolean;
+  AllPlaces: Place[] | undefined;
+  NumberofPlaces: number;
+  setAllPlaces: any;
   Loading: boolean;
 }
 
 const PlacesBottomSheet = ({
-  AllPlaces,
   PlacesByCat,
   category,
   FadeRight,
+  AllPlaces,
+  NumberofPlaces,
+  setAllPlaces,
   Loading,
 }: Props) => {
+  // refs
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["10%", "100%"], []);
-  const [refresh, setrefresh] = useState(0);
-  const listRef = useRef<FlatList>(null);
+  const listRef = useRef<BottomSheetFlatListMethods>(null);
 
+  // loading
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refresh, setrefresh] = useState(0);
+
+  // handling Scroll loading
+  const handleEndReached = async () => {
+    if (!loadingMore && AllPlaces && AllPlaces?.length < NumberofPlaces) {
+      setLoadingMore(true);
+      try {
+        const startIndex = AllPlaces?.length;
+        const endIndex = Math.min(startIndex + 5, NumberofPlaces);
+
+        const { data } = await axios.get(
+          "https://roomsy-v3-server.vercel.app/api/places"
+        );
+
+        const slicedData = data.slice(startIndex, endIndex);
+
+        setAllPlaces((prevData: any) => [...prevData, ...slicedData]);
+      } catch (error) {
+        console.log(error);
+      }
+      setLoadingMore(false);
+    }
+  };
+
+  // show map
   const ShowMap = () => {
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
   };
 
+  // Scrolling the list
   useEffect(() => {
     if (refresh) {
       listRef.current?.scrollToOffset({ offset: 0, animated: true });
     }
   }, [refresh]);
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, [category]);
 
   return (
     <BottomSheet
@@ -81,25 +128,36 @@ const PlacesBottomSheet = ({
       style={styles.sheetContainer}
       backgroundStyle={{ backgroundColor: "white" }}
     >
-      <View style={{ marginBottom: 0 }}>
+      <View style={{ marginBottom: 0, flex: 1 }}>
         {category === "All" ? (
-          <>
-            {AllPlaces && AllPlaces?.length > 0 ? (
-              <FlatList
+          <View style={{ flex: 1 }}>
+            {AllPlaces ? (
+              <BottomSheetFlatList
                 ref={listRef}
                 data={AllPlaces}
-                renderItem={(place) => (
+                renderItem={(place: any) => (
                   <PlacesLg
                     place={place.item}
                     FadeRight={FadeRight}
                     Loading={Loading}
                   />
                 )}
-                keyExtractor={(place) => place._id}
+                keyExtractor={(place: Place) => place._id}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ gap: 40 }}
                 ListHeaderComponent={
-                  <Text style={styles.info}>{AllPlaces?.length} Places</Text>
+                  <Text style={styles.info}>{NumberofPlaces} Places</Text>
+                }
+                onEndReached={handleEndReached}
+                onEndReachedThreshold={1}
+                ListFooterComponent={
+                  loadingMore ? (
+                    <ActivityIndicator
+                      size="large"
+                      color={Colors.maincolor}
+                      style={{ marginBottom: 10 }}
+                    />
+                  ) : null
                 }
               />
             ) : (
@@ -109,14 +167,14 @@ const PlacesBottomSheet = ({
                 style={{ marginTop: 50 }}
               />
             )}
-          </>
+          </View>
         ) : (
-          <>
+          <View style={{ flex: 1 }}>
             {PlacesByCat && PlacesByCat.length > 0 ? (
-              <FlatList
+              <BottomSheetFlatList
                 ref={listRef}
                 data={PlacesByCat}
-                renderItem={(place) => (
+                renderItem={(place: any) => (
                   <PlacesLg
                     place={place.item}
                     FadeRight={FadeRight}
@@ -137,7 +195,7 @@ const PlacesBottomSheet = ({
                 style={{ marginTop: 50 }}
               />
             )}
-          </>
+          </View>
         )}
       </View>
 
