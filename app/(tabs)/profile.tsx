@@ -14,9 +14,14 @@ import { Link, Stack, useRouter } from "expo-router";
 import axios from "axios";
 import styles from "@/components/profile/profile.styles";
 import { formatDistanceToNow } from "date-fns";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import PlaceCard from "@/components/profile/PlaceCard";
 import Colors from "@/constants/Colors";
+import { Alert } from "react-native";
 
 interface User {
   id: string;
@@ -83,6 +88,9 @@ const Page = () => {
         const jsonValue = await AsyncStorage.getItem("user_session");
         const data = jsonValue != null ? JSON.parse(jsonValue) : null;
         setUserData(data);
+        if (!data.userId) {
+          router.replace("/(modals)/login");
+        }
       } catch (error) {
         console.log("Error getting data:", error);
       }
@@ -164,17 +172,34 @@ const Page = () => {
 
   const logOut = async () => {
     try {
-      await AsyncStorage.setItem(
-        "user_session",
-        JSON.stringify({
-          number: "",
-          token: "",
-          userId: "",
-        })
+      Alert.alert(
+        "Confirm Logout",
+        "Are you sure you want to log out?",
+        [
+          {
+            text: "No",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              await AsyncStorage.setItem(
+                "user_session",
+                JSON.stringify({
+                  number: "",
+                  token: "",
+                  userId: "",
+                })
+              );
+              setUserData(null);
+              setUser(undefined);
+              router.replace("/(modals)/login");
+            },
+          },
+        ],
+        { cancelable: false }
       );
-      setUserData(null);
-      setUser(undefined);
-      router.push("/(tabs)");
     } catch (e) {
       console.log("Error");
     }
@@ -189,21 +214,21 @@ const Page = () => {
           headerShown: false,
         }}
       />
-      <ScrollView>
-        <Link href={"/(modals)/login"} style={styles.container}>
-          Login
-        </Link>
-
+      <ScrollView style={{ backgroundColor: "#fff" }}>
         {User && (
           <View>
             <View style={styles.container}>
-              {userData?.userId && (
-                <TouchableOpacity onPress={logOut}>
-                  <Text>Log out</Text>
-                </TouchableOpacity>
-              )}
-
               <View style={styles.UserCard}>
+                <View style={styles.logoutBtn}>
+                  <TouchableOpacity>
+                    <AntDesign name="edit" size={24} color="black" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={logOut}>
+                    <AntDesign name="logout" size={22} color={"#e83636"} />
+                  </TouchableOpacity>
+                </View>
+
                 <View style={styles.UserCardTop}>
                   <Image
                     source={{ uri: User?.profilepic }}
@@ -218,13 +243,13 @@ const Page = () => {
 
                 <View style={styles.UserCardBottom}>
                   <View style={styles.UserCardBottomView}>
-                    <Text style={{ fontFamily: "popMedium" }}>
+                    <Text style={{ fontFamily: "popMedium", fontSize: 15 }}>
                       {TotalReviews}
                     </Text>
                     <Text style={styles.UserCardBottomtext}>Reviews</Text>
                   </View>
                   <View style={styles.UserCardBottomView}>
-                    <Text style={{ fontFamily: "popMedium" }}>
+                    <Text style={{ fontFamily: "popMedium", fontSize: 15 }}>
                       {AverageRating}
                     </Text>
                     <Text style={styles.UserCardBottomtext}>
@@ -232,7 +257,7 @@ const Page = () => {
                     </Text>
                   </View>
                   <View style={styles.UserCardBottomView}>
-                    <Text style={{ fontFamily: "popMedium" }}>
+                    <Text style={{ fontFamily: "popMedium", fontSize: 15 }}>
                       {StartedHosting}
                     </Text>
                     <Text style={styles.UserCardBottomtext}>
@@ -248,9 +273,8 @@ const Page = () => {
                 </Text>
                 <View
                   style={{
-                    flexDirection: "row",
+                    alignItems:"flex-start",
                     gap: 10,
-                    alignItems: "center",
                   }}
                 >
                   <View
@@ -398,7 +422,11 @@ const Page = () => {
 
         {Loading && (
           <View style={styles.container}>
-            <ActivityIndicator size={"large"} color={Colors.maincolor} />
+            <ActivityIndicator
+              size={"large"}
+              color={Colors.maincolor}
+              style={{ marginTop: 100 }}
+            />
           </View>
         )}
       </ScrollView>

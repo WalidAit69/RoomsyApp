@@ -99,7 +99,7 @@ const SignInForm = ({ setRegistrationType }: any) => {
 
         <TouchableOpacity
           style={styles.topiconcontainer}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/(tabs)")}
         >
           <Ionicons name="close-outline" size={24} color="black" />
         </TouchableOpacity>

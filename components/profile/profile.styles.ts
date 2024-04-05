@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
     width: "100%",
     alignItems: "center",
   },
@@ -13,7 +12,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
     paddingVertical: 20,
-    backgroundColor: Colors.bordercolor,
+    backgroundColor: Colors.backgoundcolorlight,
     width: "90%",
     borderRadius: 12,
   },
@@ -28,12 +27,12 @@ const styles = StyleSheet.create({
   },
   UserCardTopText: {
     fontFamily: "popSemibold",
-    fontSize: 15,
+    fontSize: 16,
     marginTop: 10,
   },
   UserCardTopTexthost: {
     fontFamily: "popRegular",
-    fontSize: 13,
+    fontSize: 14,
     opacity: 0.5,
     lineHeight: 15,
   },
@@ -49,7 +48,7 @@ const styles = StyleSheet.create({
   },
   UserCardBottomtext: {
     fontFamily: "popRegular",
-    fontSize: 10,
+    fontSize: 11,
     color: "#827f7f",
   },
   infoCard: {
@@ -65,13 +64,14 @@ const styles = StyleSheet.create({
   },
   infoCardtext: {
     fontFamily: "popSemibold",
-    fontSize: 14,
+    fontSize: 16,
   },
   infoCardtextsm: {
     fontFamily: "popRegular",
-    fontSize: 12,
+    fontSize: 15,
     color: "#827f7f",
     marginTop: 1,
+    maxWidth: "90%",
   },
   containerleft: {
     width: "100%",
@@ -140,6 +140,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.6,
     textAlign: "justify",
+  },
+  logoutBtn: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    flexDirection: "row",
+    gap: 20,
   },
 });
 

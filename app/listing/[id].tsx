@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import CustomImage from "@/components/CustomImage";
 import axios from "axios";
 import {
   AntDesign,
@@ -25,7 +24,6 @@ import { styles } from "./Place.styles";
 import ReviewCard from "@/components/Listings/ReviewCard";
 import CustomUserImage from "@/components/CustomUserImage";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from "expo-location";
 import PlaceSmCard from "@/components/Listings/PlaceSmCard";
 import Carousel from "pinar";
 import Animated, {
@@ -68,6 +66,8 @@ interface Place {
   __v: number;
   likedBy: string[];
   reviews: review[];
+  latitude: number;
+  longitude: number;
 }
 
 interface review {
@@ -85,104 +85,68 @@ interface UserData {
 
 const Page = () => {
   const IMG_HEIGHT = 500;
-
   const router = useRouter();
-  const { id } = useLocalSearchParams();
 
-  const [HomeLocation, setHomeLocation] =
-    useState<Location.LocationGeocodedLocation[]>();
+  // REFS
   const mapRef = useRef<MapView>(null);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
+  // DATA
+  const { id } = useLocalSearchParams();
   const [Place, setPlace] = useState<Place>();
   const [AllPlaces, setAllPlaces] = useState<Place[]>();
   const [UserData, setUserData] = useState<UserData>();
   const [isLiked, setisLiked] = useState(false);
   const like = Place?.likedBy;
-
-  const getUserData = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem("user_session");
-      const data = jsonValue != null ? JSON.parse(jsonValue) : null;
-      setUserData(data);
-    } catch (error) {
-      console.log("Error getting data:", error);
-    }
-  };
-
-  const GetPlace = async () => {
-    try {
-      const { data } = await axios.get(
-        `https://roomsy-v3-server.vercel.app/api/place/${id}`
-      );
-      setPlace(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getLocation = async () => {
-    const addressString = `${Place?.address}, ${Place?.city}, ${Place?.country}`;
-    const location = await Location.geocodeAsync(addressString);
-    setHomeLocation(location);
-  };
-
-  const GetAllPlaces = async () => {
-    try {
-      const { data } = await axios.get(
-        "https://roomsy-v3-server.vercel.app/api/places"
-      );
-      const updatedPlaces = data.filter((place: Place) => place._id !== id);
-      setAllPlaces(updatedPlaces);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("user_session");
+        const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+        setUserData(data);
+      } catch (error) {
+        console.log("Error getting data:", error);
+      }
+    };
+    const GetPlace = async () => {
+      try {
+        const { data } = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/place/${id}`
+        );
+        setPlace(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const GetAllPlaces = async () => {
+      try {
+        const { data } = await axios.get(
+          "https://roomsy-v3-server.vercel.app/api/places"
+        );
+        const updatedPlaces = data.filter((place: Place) => place._id !== id);
+        setAllPlaces(updatedPlaces);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     GetPlace();
     GetAllPlaces();
     getUserData();
   }, []);
 
+  // Animations
   useEffect(() => {
-    getLocation();
-  }, [Place]);
-
-  useEffect(() => {
-    if (HomeLocation && HomeLocation.length > 0) {
+    if (Place) {
       mapRef.current?.animateToRegion({
-        latitude: HomeLocation[0].latitude,
-        longitude: HomeLocation[0].longitude,
+        latitude: Place.latitude,
+        longitude: Place.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
     }
-  }, [HomeLocation]);
-
-  const CalculateAverageRating = () => {
-    if (Place) {
-      if (!Place.reviews || Place.reviews.length === 0) {
-        return 0;
-      }
-
-      const totalRating = Place.reviews.reduce(
-        (acc: number, review: { rating: number }) => acc + review.rating,
-        0
-      );
-      return totalRating / Place.reviews.length;
-    }
-  };
-
-  const PlaceRating = CalculateAverageRating();
-
-  function checkIfPerkExists(perks: string[], perk: string) {
-    return perks && perks.includes(perk);
-  }
-
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-
+  }, [Place]);
   const scrollOffset = useScrollViewOffset(scrollRef);
-
   const imageAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -196,13 +160,32 @@ const Page = () => {
       ],
     };
   });
-
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(scrollOffset.value, [0, IMG_HEIGHT / 1.2], [0, 1]),
     };
   });
 
+  // Rating and Perks
+  const CalculateAverageRating = () => {
+    if (Place) {
+      if (!Place.reviews || Place.reviews.length === 0) {
+        return 0;
+      }
+
+      const totalRating = Place.reviews.reduce(
+        (acc: number, review: { rating: number }) => acc + review.rating,
+        0
+      );
+      return totalRating / Place.reviews.length;
+    }
+  };
+  const PlaceRating = CalculateAverageRating();
+  function checkIfPerkExists(perks: string[], perk: string) {
+    return perks && perks.includes(perk);
+  }
+
+  // Share And Like
   const sharePlace = async () => {
     try {
       await Share.share({
@@ -213,7 +196,6 @@ const Page = () => {
       console.error(error);
     }
   };
-
   const handleLikeClick = async () => {
     if (UserData?.userId) {
       try {
@@ -228,7 +210,6 @@ const Page = () => {
       UseToast({ msg: "Please log in first" || "Please log in first" });
     }
   };
-
   const handleLike = async () => {
     if (
       Place?.likedBy &&
@@ -240,19 +221,17 @@ const Page = () => {
       setisLiked(false);
     }
   };
-
   useEffect(() => {
     handleLike();
   }, [like]);
 
+  // Description And Location Modal
   const [modalVisible, setModalVisible] = useState(false);
   const [isDescription, setisDescription] = useState(true);
-
   const toggleDescModal = () => {
     setisDescription(true);
     setModalVisible(!modalVisible);
   };
-
   const toggleLocModal = () => {
     setisDescription(false);
     setModalVisible(!modalVisible);
@@ -688,30 +667,28 @@ const Page = () => {
                 <Text style={styles.arrangementsTitle}>Location</Text>
 
                 <View>
-                  {HomeLocation && HomeLocation.length > 0 && (
-                    <MapView ref={mapRef} style={styles.MiniMap}>
-                      <Marker
-                        key={Place._id}
-                        coordinate={{
-                          latitude: HomeLocation && HomeLocation[0].latitude,
-                          longitude: HomeLocation && HomeLocation[0].longitude,
-                        }}
-                      >
-                        <View style={styles.HomeOuterContainer}>
-                          <View style={styles.HomeContainer}>
-                            <FontAwesome6
-                              name="house-chimney"
-                              size={16}
-                              color="white"
-                            />
-                          </View>
+                  <MapView ref={mapRef} style={styles.MiniMap}>
+                    <Marker
+                      key={Place._id}
+                      coordinate={{
+                        latitude: Place?.latitude,
+                        longitude: Place?.longitude,
+                      }}
+                    >
+                      <View style={styles.HomeOuterContainer}>
+                        <View style={styles.HomeContainer}>
+                          <FontAwesome6
+                            name="house-chimney"
+                            size={16}
+                            color="white"
+                          />
                         </View>
-                      </Marker>
-                    </MapView>
-                  )}
+                      </View>
+                    </Marker>
+                  </MapView>
                 </View>
 
-                {!HomeLocation && !Place.extrainfo && (
+                {!Place?.latitude && Place?.longitude && !Place.extrainfo && (
                   <Text
                     style={{
                       fontFamily: "popMedium",

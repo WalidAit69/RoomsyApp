@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import CustomImage from "../CustomImage";
 import Animated, {
   FadeInLeft,
   FadeInRight,
   FadeOutLeft,
 } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import Carousel from "pinar";
+import Colors from "@/constants/Colors";
 
 interface Place {
   _id: string;
@@ -81,19 +82,40 @@ const PlacesLg = ({
         entering={FadeRight ? FadeInLeft : FadeInRight}
         exiting={FadeOutLeft}
       >
-        <TouchableOpacity
-          style={{ position: "relative" }}
-          onPress={() => router.push(`/listing/${place._id}`)}
-        >
-          <CustomImage
-            source={place?.images[0]}
+        <View style={{ position: "relative" }}>
+          <Carousel
+            showsControls={false}
+            autoplay={true}
+            autoplayInterval={5000}
+            loop
             style={styles.PlaceCardImg}
-            resizeMode="cover"
-          />
+            dotStyle={styles.dots}
+            activeDotStyle={styles.activedot}
+            dotsContainerStyle={styles.dotscontainer}
+          >
+            {place.images.slice(0, 5).map((image, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => router.push(`/listing/${place._id}`)}
+                style={{ alignItems: "center", justifyContent: "center" }}
+              >
+                <Animated.Image
+                  source={{
+                    uri: image.includes("https://")
+                      ? image
+                      : "https://roomsy-v3-server.vercel.app/server/routes/uploads/" +
+                        image,
+                  }}
+                  resizeMode="cover"
+                  style={[styles.PlaceCardImg, { width: "99%" }]}
+                />
+              </TouchableOpacity>
+            ))}
+          </Carousel>
           <View style={styles.ratingcontainer}>
             <Text style={styles.rating}>{PlaceRating}</Text>
           </View>
-        </TouchableOpacity>
+        </View>
 
         <View style={{ gap: 3 }}>
           <Text numberOfLines={1} style={styles.title}>
@@ -160,6 +182,29 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 13,
     fontFamily: "popRegular",
+  },
+  dots: {
+    width: 5,
+    height: 3,
+    marginHorizontal: 3,
+    borderRadius: 3,
+    backgroundColor: Colors.backgoundcolor,
+  },
+  activedot: {
+    backgroundColor: Colors.maincolor,
+    width: 10,
+    height: 3,
+    marginHorizontal: 3,
+    borderRadius: 3,
+  },
+  dotscontainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    bottom: 20,
+    flexWrap: "wrap",
+    marginHorizontal: 5,
+    rowGap: 5,
   },
 });
 export default PlacesLg;
