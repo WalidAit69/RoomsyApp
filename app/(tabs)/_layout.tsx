@@ -23,7 +23,7 @@ const Layout = () => {
       />
 
       <Tabs.Screen
-        name="likes"
+        name="bookings"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="heart-outline" size={size} color={color} />

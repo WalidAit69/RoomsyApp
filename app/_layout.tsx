@@ -1,12 +1,10 @@
-import ModalHeaderText from "@/components/explore/ModalHeaderText";
-import Colors from "@/constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { Platform, TouchableOpacity } from "react-native";
 import { RootSiblingParent } from "react-native-root-siblings";
+import { store } from "@/store/store";
+import { Provider } from "react-redux";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -50,27 +48,29 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <RootSiblingParent>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="(modals)/login"
-          options={{
-            presentation: "modal",
-            headerShown: false,
-          }}
-        />
+    <Provider store={store}>
+      <RootSiblingParent>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="(modals)/login"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+            }}
+          />
 
-        <Stack.Screen name="listing/[id]" options={{ headerTitle: "" }} />
+          <Stack.Screen name="listing/[id]" options={{ headerTitle: "" }} />
 
-        <Stack.Screen
-          name="(modals)/booking"
-          options={{
-            presentation: "transparentModal",
-            animation: "fade",
-          }}
-        />
-      </Stack>
-    </RootSiblingParent>
+          <Stack.Screen
+            name="(modals)/booking"
+            options={{
+              presentation: "transparentModal",
+              animation: "fade",
+            }}
+          />
+        </Stack>
+      </RootSiblingParent>
+    </Provider>
   );
 }

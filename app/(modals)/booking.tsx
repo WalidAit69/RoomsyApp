@@ -19,6 +19,7 @@ import { places } from "@/assets/data/places";
 import { Dropdown } from "react-native-element-dropdown";
 import useCountries from "@/hooks/useCountries";
 import UseToast from "@/widgets/Toast";
+import { RootSiblingParent } from "react-native-root-siblings";
 
 //@ts-ignore
 import DatePicker from "react-native-modern-datepicker";
@@ -114,406 +115,412 @@ const booking = () => {
   };
 
   return (
-    <BlurView
-      intensity={70}
-      experimentalBlurMethod={"dimezisBlurView"}
-      tint="light"
-      style={styles.container}
-    >
-      <Stack.Screen
-        options={{
-          headerShadowVisible: false,
-          headerTitle: () => <ModalHeaderText />,
-          headerLeft: () =>
-            Platform.OS === "ios" && (
-              <TouchableOpacity
-                style={{
-                  backgroundColor: "#fff",
-                  borderColor: Colors.bordercolor,
-                  borderRadius: 20,
-                  borderWidth: 1,
-                  padding: 5,
-                }}
-                onPress={() => router.back()}
-              >
-                <Ionicons name="close-outline" size={24} color="black" />
-              </TouchableOpacity>
-            ),
-          headerTitleAlign: "center",
-          headerTransparent : true,
-        }}
-      />
-      <ScrollView
-        style={{ marginBottom: 120 }}
+    <RootSiblingParent>
+      <BlurView
+        intensity={70}
+        experimentalBlurMethod={"dimezisBlurView"}
+        tint="light"
+        style={styles.container}
       >
-        {/* Where */}
-        <View style={styles.card}>
-          {openCard != 0 && (
-            <AnimatedTouchableOpacity
-              entering={FadeIn.duration(200)}
-              style={styles.cardbtn}
-              onPress={() => setopenCard(0)}
-            >
-              <Text style={styles.previewText}>Where</Text>
-              <Text style={styles.previewDate}>I'm flexible</Text>
-            </AnimatedTouchableOpacity>
-          )}
-
-          {openCard === 0 && (
-            <Animated.View>
-              <Animated.Text
-                entering={FadeIn.delay(200)}
-                style={styles.cardHeader}
-              >
-                Where to ?
-              </Animated.Text>
-
-              <Animated.View
-                entering={FadeIn.delay(300)}
-                style={styles.cardBody}
-              >
-                <View style={styles.searchSection}>
-                  {renderLabel()}
-                  <Dropdown
-                    style={[
-                      styles.dropdown,
-                      isFocus && { borderColor: Colors.maincolor },
-                    ]}
-                    placeholder={!isFocus ? "Select country" : "..."}
-                    data={countries}
-                    value={selectedCountry}
-                    labelField="label"
-                    valueField="value"
-                    onChange={(item) => {
-                      setSelectedCountry(item.value);
-                      setIsFocus(false);
-                      setselectedPlace(0);
-                    }}
-                    search
-                    searchPlaceholder="Search..."
-                    onFocus={() => {
-                      setIsFocus(true);
-                      setSelectedCountry("");
-                    }}
-                    onBlur={() => setIsFocus(false)}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                  />
-                </View>
-              </Animated.View>
-
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  gap: 15,
-                  paddingHorizontal: 15,
-                  marginBottom: 20,
-                }}
-              >
-                {places.map((place, index) => (
-                  <AnimatedTouchableOpacity
-                    entering={FadeIn.delay(400)}
-                    key={index}
-                    onPress={() => handleLocationClick(index, place.title)}
-                  >
-                    <Image
-                      source={place.img}
-                      style={
-                        selectedPlace === index
-                          ? styles.placeSelected
-                          : styles.place
-                      }
-                    />
-                    <Text
-                      style={
-                        selectedPlace === index
-                          ? styles.placeSelectedtext
-                          : styles.placetext
-                      }
-                    >
-                      {place.title}
-                    </Text>
-                  </AnimatedTouchableOpacity>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* When */}
-        <View style={styles.card}>
-          {openCard != 1 && (
-            <AnimatedTouchableOpacity
-              entering={FadeIn.duration(200)}
-              style={styles.cardbtn}
-              onPress={() => setopenCard(1)}
-            >
-              <Text style={styles.previewText}>When</Text>
-              <Text style={styles.previewDate}>Any week</Text>
-            </AnimatedTouchableOpacity>
-          )}
-
-          {openCard === 1 && (
-            <Animated.View>
-              <Animated.Text
-                entering={FadeIn.delay(200)}
-                style={styles.cardHeader}
-              >
-                When's your trip ?
-              </Animated.Text>
-
-              <Animated.View
-                entering={FadeIn.delay(300)}
-                style={styles.cardBody}
-              >
-                {!ShowCalendar && (
-                  <DatePicker
-                    options={{
-                      defaultFont: "popMedium",
-                      headerFont: "popSemibold",
-                      mainColor: Colors.maincolor,
-                    }}
-                    current={today}
-                    selected={Checkin}
-                    mode="calendar"
-                    style={{ borderRadius: 10 }}
-                    minimumDate={today}
-                    onSelectedChange={(date: any) =>
-                      setCheckin(date.replace(/\//g, "-"))
-                    }
-                  />
-                )}
-                {ShowCalendar && (
-                  <DatePicker
-                    options={{
-                      defaultFont: "popMedium",
-                      headerFont: "popSemibold",
-                      mainColor: Colors.maincolor,
-                    }}
-                    minimumDate={nextDay.toISOString().substring(0, 10)}
-                    current={nextDay.toISOString().substring(0, 10)}
-                    selected={Checkout}
-                    mode="calendar"
-                    style={{ borderRadius: 10 }}
-                    onSelectedChange={(date: any) =>
-                      setCheckout(date.replace(/\//g, "-"))
-                    }
-                  />
-                )}
-
-                {Checkin && (
-                  <Animated.View
-                    entering={FadeIn.delay(200)}
-                    style={{ gap: 10 }}
-                  >
-                    <TouchableOpacity
-                      onPress={handlecheckinClick}
-                      style={
-                        !ShowCalendar
-                          ? styles.searchSectionActive
-                          : styles.searchSectionNoActive
-                      }
-                    >
-                      <Text style={styles.searchSectionText}>{Checkin}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={handlecheckoutClick}
-                      style={
-                        ShowCalendar
-                          ? styles.searchSectionActive
-                          : styles.searchSectionNoActive
-                      }
-                    >
-                      {Checkout ? (
-                        <Text style={styles.searchSectionText}>{Checkout}</Text>
-                      ) : (
-                        <Text
-                          style={[styles.searchSectionText, { opacity: 0.5 }]}
-                        >
-                          Select check out
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  </Animated.View>
-                )}
-              </Animated.View>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* Who */}
-        <View style={styles.card}>
-          {openCard != 2 && (
-            <AnimatedTouchableOpacity
-              entering={FadeIn.duration(200)}
-              style={styles.cardbtn}
-              onPress={() => setopenCard(2)}
-            >
-              <Text style={styles.previewText}>Who</Text>
-              <Text style={styles.previewDate}>Add guests</Text>
-            </AnimatedTouchableOpacity>
-          )}
-
-          {openCard === 2 && (
-            <Animated.View>
-              <Animated.Text
-                entering={FadeIn.delay(200)}
-                style={styles.cardHeader}
-              >
-                Who's coming ?
-              </Animated.Text>
-
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <Animated.View
-                  entering={FadeIn.delay(200)}
-                  style={styles.guestcontainer}
+        <Stack.Screen
+          options={{
+            headerShadowVisible: false,
+            headerTitle: () => <ModalHeaderText />,
+            headerLeft: () =>
+              Platform.OS === "ios" && (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#fff",
+                    borderColor: Colors.bordercolor,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    padding: 5,
+                  }}
+                  onPress={() => router.back()}
                 >
-                  <View style={styles.guests}>
-                    <Text style={styles.guestText}>Adults</Text>
-                    <Text style={styles.guestDesc}>Ages 13 or above</Text>
-                  </View>
+                  <Ionicons name="close-outline" size={24} color="black" />
+                </TouchableOpacity>
+              ),
+            headerTitleAlign: "center",
+            headerTransparent: true,
+          }}
+        />
+        <ScrollView style={{ marginBottom: 120 }}>
+          {/* Where */}
+          <View style={styles.card}>
+            {openCard != 0 && (
+              <AnimatedTouchableOpacity
+                entering={FadeIn.duration(200)}
+                style={styles.cardbtn}
+                onPress={() => setopenCard(0)}
+              >
+                <Text style={styles.previewText}>Where</Text>
+                <Text style={styles.previewDate}>I'm flexible</Text>
+              </AnimatedTouchableOpacity>
+            )}
 
-                  <View style={styles.guestnumbercountainer}>
-                    <TouchableOpacity
-                      disabled={adults === 1}
-                      style={adults === 1 ? styles.icon : styles.iconActive}
-                      onPress={handleAdultsMinusClick}
-                    >
-                      <AntDesign name="minus" size={15} color="black" />
-                    </TouchableOpacity>
-
-                    <Text style={styles.guestnumber}>{adults}</Text>
-
-                    <TouchableOpacity
-                      style={styles.iconActive}
-                      onPress={() => {
-                        setadults(adults + 1);
-                      }}
-                    >
-                      <AntDesign name="plus" size={15} color="black" />
-                    </TouchableOpacity>
-                  </View>
-                </Animated.View>
+            {openCard === 0 && (
+              <Animated.View>
+                <Animated.Text
+                  entering={FadeIn.delay(200)}
+                  style={styles.cardHeader}
+                >
+                  Where to ?
+                </Animated.Text>
 
                 <Animated.View
                   entering={FadeIn.delay(300)}
-                  style={styles.guestcontainer}
+                  style={styles.cardBody}
                 >
-                  <View style={styles.guests}>
-                    <Text style={styles.guestText}>Children</Text>
-                    <Text style={styles.guestDesc}>Ages 2-12</Text>
-                  </View>
-
-                  <View style={styles.guestnumbercountainer}>
-                    <TouchableOpacity
-                      disabled={childrens === 0}
-                      style={childrens === 0 ? styles.icon : styles.iconActive}
-                      onPress={() => {
-                        setchildrens(childrens - 1);
+                  <View style={styles.searchSection}>
+                    {renderLabel()}
+                    <Dropdown
+                      style={[
+                        styles.dropdown,
+                        isFocus && { borderColor: Colors.maincolor },
+                      ]}
+                      placeholder={!isFocus ? "Select country" : "..."}
+                      data={countries}
+                      value={selectedCountry}
+                      labelField="label"
+                      valueField="value"
+                      onChange={(item) => {
+                        setSelectedCountry(item.value);
+                        setIsFocus(false);
+                        setselectedPlace(0);
                       }}
-                    >
-                      <AntDesign name="minus" size={15} color="black" />
-                    </TouchableOpacity>
-
-                    <Text style={styles.guestnumber}>{childrens}</Text>
-
-                    <TouchableOpacity
-                      style={styles.iconActive}
-                      onPress={() => {
-                        setchildrens(childrens + 1);
+                      search
+                      searchPlaceholder="Search..."
+                      onFocus={() => {
+                        setIsFocus(true);
+                        setSelectedCountry("");
                       }}
-                    >
-                      <AntDesign name="plus" size={15} color="black" />
-                    </TouchableOpacity>
+                      onBlur={() => setIsFocus(false)}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                    />
                   </View>
                 </Animated.View>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
+                    gap: 15,
+                    paddingHorizontal: 15,
+                    marginBottom: 20,
+                  }}
+                >
+                  {places.map((place, index) => (
+                    <AnimatedTouchableOpacity
+                      entering={FadeIn.delay(400)}
+                      key={index}
+                      onPress={() => handleLocationClick(index, place.title)}
+                    >
+                      <Image
+                        source={place.img}
+                        style={
+                          selectedPlace === index
+                            ? styles.placeSelected
+                            : styles.place
+                        }
+                      />
+                      <Text
+                        style={
+                          selectedPlace === index
+                            ? styles.placeSelectedtext
+                            : styles.placetext
+                        }
+                      >
+                        {place.title}
+                      </Text>
+                    </AnimatedTouchableOpacity>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+            )}
+          </View>
+
+          {/* When */}
+          <View style={styles.card}>
+            {openCard != 1 && (
+              <AnimatedTouchableOpacity
+                entering={FadeIn.duration(200)}
+                style={styles.cardbtn}
+                onPress={() => setopenCard(1)}
+              >
+                <Text style={styles.previewText}>When</Text>
+                <Text style={styles.previewDate}>Any week</Text>
+              </AnimatedTouchableOpacity>
+            )}
+
+            {openCard === 1 && (
+              <Animated.View>
+                <Animated.Text
+                  entering={FadeIn.delay(200)}
+                  style={styles.cardHeader}
+                >
+                  When's your trip ?
+                </Animated.Text>
 
                 <Animated.View
-                  entering={FadeIn.delay(400)}
-                  style={[styles.guestcontainer, { borderBottomWidth: 0 }]}
+                  entering={FadeIn.delay(300)}
+                  style={styles.cardBody}
                 >
-                  <View style={styles.guests}>
-                    <Text style={styles.guestText}>Infants</Text>
-                    <Text style={styles.guestDesc}>Under 2</Text>
-                  </View>
-
-                  <View style={styles.guestnumbercountainer}>
-                    <TouchableOpacity
-                      disabled={infants === 0}
-                      style={infants === 0 ? styles.icon : styles.iconActive}
-                      onPress={() => {
-                        setinfants(infants - 1);
+                  {!ShowCalendar && (
+                    <DatePicker
+                      options={{
+                        defaultFont: "popMedium",
+                        headerFont: "popSemibold",
+                        mainColor: Colors.maincolor,
                       }}
-                    >
-                      <AntDesign name="minus" size={15} color="black" />
-                    </TouchableOpacity>
-
-                    <Text style={styles.guestnumber}>{infants}</Text>
-
-                    <TouchableOpacity
-                      style={styles.iconActive}
-                      onPress={() => {
-                        setinfants(infants + 1);
+                      current={today}
+                      selected={Checkin}
+                      mode="calendar"
+                      style={{ borderRadius: 10 }}
+                      minimumDate={today}
+                      onSelectedChange={(date: any) =>
+                        setCheckin(date.replace(/\//g, "-"))
+                      }
+                    />
+                  )}
+                  {ShowCalendar && (
+                    <DatePicker
+                      options={{
+                        defaultFont: "popMedium",
+                        headerFont: "popSemibold",
+                        mainColor: Colors.maincolor,
                       }}
+                      minimumDate={nextDay.toISOString().substring(0, 10)}
+                      current={nextDay.toISOString().substring(0, 10)}
+                      selected={Checkout}
+                      mode="calendar"
+                      style={{ borderRadius: 10 }}
+                      onSelectedChange={(date: any) =>
+                        setCheckout(date.replace(/\//g, "-"))
+                      }
+                    />
+                  )}
+
+                  {Checkin && (
+                    <Animated.View
+                      entering={FadeIn.delay(200)}
+                      style={{ gap: 10 }}
                     >
-                      <AntDesign name="plus" size={15} color="black" />
-                    </TouchableOpacity>
-                  </View>
+                      <TouchableOpacity
+                        onPress={handlecheckinClick}
+                        style={
+                          !ShowCalendar
+                            ? styles.searchSectionActive
+                            : styles.searchSectionNoActive
+                        }
+                      >
+                        <Text style={styles.searchSectionText}>{Checkin}</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={handlecheckoutClick}
+                        style={
+                          ShowCalendar
+                            ? styles.searchSectionActive
+                            : styles.searchSectionNoActive
+                        }
+                      >
+                        {Checkout ? (
+                          <Text style={styles.searchSectionText}>
+                            {Checkout}
+                          </Text>
+                        ) : (
+                          <Text
+                            style={[styles.searchSectionText, { opacity: 0.5 }]}
+                          >
+                            Select check out
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    </Animated.View>
+                  )}
                 </Animated.View>
-              </View>
-            </Animated.View>
-          )}
-        </View>
-      </ScrollView>
-
-      <Animated.View style={styles.footer} entering={SlideInDown.delay(200)}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <TouchableOpacity onPress={onClear}>
-            <Text
-              style={{
-                fontFamily: "popMedium",
-                fontSize: 16,
-                textDecorationLine: "underline",
-              }}
-            >
-              Clear All
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={onSearch}
-            style={styles.btn}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator
-                size={Platform.OS === "ios" ? "small" : 30}
-                color={Colors.mainlightcolor}
-              />
-            ) : (
-              <>
-                <AntDesign
-                  name="search1"
-                  size={20}
-                  color="white"
-                  style={{ marginBottom: 2 }}
-                />
-                <Text style={styles.btntext}>Search</Text>
-              </>
+              </Animated.View>
             )}
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    </BlurView>
+          </View>
+
+          {/* Who */}
+          <View style={styles.card}>
+            {openCard != 2 && (
+              <AnimatedTouchableOpacity
+                entering={FadeIn.duration(200)}
+                style={styles.cardbtn}
+                onPress={() => setopenCard(2)}
+              >
+                <Text style={styles.previewText}>Who</Text>
+                <Text style={styles.previewDate}>Add guests</Text>
+              </AnimatedTouchableOpacity>
+            )}
+
+            {openCard === 2 && (
+              <Animated.View>
+                <Animated.Text
+                  entering={FadeIn.delay(200)}
+                  style={styles.cardHeader}
+                >
+                  Who's coming ?
+                </Animated.Text>
+
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  <Animated.View
+                    entering={FadeIn.delay(200)}
+                    style={styles.guestcontainer}
+                  >
+                    <View style={styles.guests}>
+                      <Text style={styles.guestText}>Adults</Text>
+                      <Text style={styles.guestDesc}>Ages 13 or above</Text>
+                    </View>
+
+                    <View style={styles.guestnumbercountainer}>
+                      <TouchableOpacity
+                        disabled={adults === 1}
+                        style={adults === 1 ? styles.icon : styles.iconActive}
+                        onPress={handleAdultsMinusClick}
+                      >
+                        <AntDesign name="minus" size={15} color="black" />
+                      </TouchableOpacity>
+
+                      <Text style={styles.guestnumber}>{adults}</Text>
+
+                      <TouchableOpacity
+                        style={styles.iconActive}
+                        onPress={() => {
+                          setadults(adults + 1);
+                        }}
+                      >
+                        <AntDesign name="plus" size={15} color="black" />
+                      </TouchableOpacity>
+                    </View>
+                  </Animated.View>
+
+                  <Animated.View
+                    entering={FadeIn.delay(300)}
+                    style={styles.guestcontainer}
+                  >
+                    <View style={styles.guests}>
+                      <Text style={styles.guestText}>Children</Text>
+                      <Text style={styles.guestDesc}>Ages 2-12</Text>
+                    </View>
+
+                    <View style={styles.guestnumbercountainer}>
+                      <TouchableOpacity
+                        disabled={childrens === 0}
+                        style={
+                          childrens === 0 ? styles.icon : styles.iconActive
+                        }
+                        onPress={() => {
+                          setchildrens(childrens - 1);
+                        }}
+                      >
+                        <AntDesign name="minus" size={15} color="black" />
+                      </TouchableOpacity>
+
+                      <Text style={styles.guestnumber}>{childrens}</Text>
+
+                      <TouchableOpacity
+                        style={styles.iconActive}
+                        onPress={() => {
+                          setchildrens(childrens + 1);
+                        }}
+                      >
+                        <AntDesign name="plus" size={15} color="black" />
+                      </TouchableOpacity>
+                    </View>
+                  </Animated.View>
+
+                  <Animated.View
+                    entering={FadeIn.delay(400)}
+                    style={[styles.guestcontainer, { borderBottomWidth: 0 }]}
+                  >
+                    <View style={styles.guests}>
+                      <Text style={styles.guestText}>Infants</Text>
+                      <Text style={styles.guestDesc}>Under 2</Text>
+                    </View>
+
+                    <View style={styles.guestnumbercountainer}>
+                      <TouchableOpacity
+                        disabled={infants === 0}
+                        style={infants === 0 ? styles.icon : styles.iconActive}
+                        onPress={() => {
+                          setinfants(infants - 1);
+                        }}
+                      >
+                        <AntDesign name="minus" size={15} color="black" />
+                      </TouchableOpacity>
+
+                      <Text style={styles.guestnumber}>{infants}</Text>
+
+                      <TouchableOpacity
+                        style={styles.iconActive}
+                        onPress={() => {
+                          setinfants(infants + 1);
+                        }}
+                      >
+                        <AntDesign name="plus" size={15} color="black" />
+                      </TouchableOpacity>
+                    </View>
+                  </Animated.View>
+                </View>
+              </Animated.View>
+            )}
+          </View>
+        </ScrollView>
+
+        <Animated.View style={styles.footer} entering={SlideInDown.delay(200)}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity onPress={onClear}>
+              <Text
+                style={{
+                  fontFamily: "popMedium",
+                  fontSize: 16,
+                  textDecorationLine: "underline",
+                }}
+              >
+                Clear All
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={onSearch}
+              style={styles.btn}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator
+                  size={Platform.OS === "ios" ? "small" : 30}
+                  color={Colors.mainlightcolor}
+                />
+              ) : (
+                <>
+                  <AntDesign
+                    name="search1"
+                    size={20}
+                    color="white"
+                    style={{ marginBottom: 2 }}
+                  />
+                  <Text style={styles.btntext}>Search</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </BlurView>
+    </RootSiblingParent>
   );
 };
 

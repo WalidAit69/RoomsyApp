@@ -1,10 +1,11 @@
 import Colors from "@/constants/Colors";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
     alignItems: "center",
+    marginTop: 30,
   },
   UserCard: {
     marginTop: 50,
@@ -147,6 +148,29 @@ const styles = StyleSheet.create({
     top: 10,
     flexDirection: "row",
     gap: 20,
+  },
+  headerleft: {
+    flexDirection: "row",
+    gap: 5,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    height: 40,
+    paddingHorizontal: 15,
+    borderRadius: 40,
+    ...Platform.select({
+      ios: {
+        shadowColor: "rgba(0, 0, 0, 0.3)",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  headerleftText: {
+    fontFamily: "popMedium",
   },
 });
 

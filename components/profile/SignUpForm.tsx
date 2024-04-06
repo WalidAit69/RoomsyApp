@@ -16,18 +16,23 @@ import axios from "axios";
 import uploadImageToS3 from "@/widgets/uploadImageToS3";
 import * as ImagePicker from "expo-image-picker";
 import UseToast from "@/widgets/Toast";
+import { useDispatch } from "react-redux";
+import { signin } from "@/features/registrationTypeSlice";
 
-const SignUpForm = ({ setRegistrationType }: any) => {
+const SignUpForm = () => {
   const router = useRouter();
 
+  // country picker
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("");
   const [countryName, setCountryName] = useState("");
 
+  // states
   const [Step, setStep] = useState(1);
   const [FormError, setFormError] = useState("");
   const [Loading, setLoading] = useState(false);
 
+  // data
   const [Number, setNumber] = useState("");
   const [Fullname, setFullname] = useState("");
   const [Bio, setBio] = useState("");
@@ -37,6 +42,10 @@ const SignUpForm = ({ setRegistrationType }: any) => {
   const [mimetype, setmimetype] = useState<string>();
   const [imageUri, setimageUri] = useState<string>();
 
+  // register type
+  const dispatch = useDispatch();
+
+  // getting image from user
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -51,6 +60,7 @@ const SignUpForm = ({ setRegistrationType }: any) => {
     }
   };
 
+  // countinue button
   function handleContinue() {
     if (countryCode && Number.length > 8) {
       setStep(2);
@@ -60,12 +70,14 @@ const SignUpForm = ({ setRegistrationType }: any) => {
     }
   }
 
+  // sign up button
   function handleSignUp() {
     Fullname && Email && Password && Location && Bio && imageUri
       ? SignUp()
       : setFormError("All fields are required");
   }
 
+  // api call
   const ext = mimetype?.split("/")[1];
   const filename = Date.now() + "." + ext;
 
@@ -98,7 +110,7 @@ const SignUpForm = ({ setRegistrationType }: any) => {
             }
           );
 
-          setRegistrationType("signin");
+          dispatch(signin());
         }
       } catch (error: any) {
         UseToast({ msg: error?.response?.data?.msg || "Unknown error" });
@@ -126,7 +138,7 @@ const SignUpForm = ({ setRegistrationType }: any) => {
                 <Text style={{ fontFamily: "popLight", fontSize: 12 }}>
                   Have an account?
                 </Text>
-                <TouchableOpacity onPress={() => setRegistrationType("signin")}>
+                <TouchableOpacity onPress={() => dispatch(signin())}>
                   <Text
                     style={{
                       fontFamily: "popLight",
@@ -154,7 +166,7 @@ const SignUpForm = ({ setRegistrationType }: any) => {
 
         <TouchableOpacity
           style={styles.topiconcontainer}
-          onPress={() => router.replace("/(tabs)")}
+          onPress={() => router.back()}
         >
           <Ionicons name="close-outline" size={24} color="black" />
         </TouchableOpacity>

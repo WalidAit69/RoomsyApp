@@ -148,7 +148,7 @@ const ExploreHeader = ({ onCategoryChanged, setFadeRight }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: Platform.OS === "ios" ? 0 : 30,
+    paddingTop: Platform.OS === "ios" ? 0 : 30,
     backgroundColor: "white",
   },
   actionRow: {

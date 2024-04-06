@@ -237,6 +237,12 @@ const Page = () => {
     setModalVisible(!modalVisible);
   };
 
+  const handleNavigate = () => {
+    UserData?.userId === Place?.owner._id
+      ? router.push("/profile")
+      : router.push(`/userpage/${Place?.owner._id}`);
+  };
+
   return (
     <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
       <Stack.Screen
@@ -347,7 +353,9 @@ const Page = () => {
                   <Text style={styles.hostText}>by {Place.owner.fullname}</Text>
                 </View>
 
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleNavigate}
+                >
                   <CustomUserImage
                     source={Place.owner.profilepic}
                     resizeMode="cover"

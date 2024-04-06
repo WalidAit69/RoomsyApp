@@ -2,14 +2,13 @@ import {
   View,
   Text,
   TouchableOpacity,
+  SafeAreaView,
   ScrollView,
-  Image,
   FlatList,
   ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import styles from "@/components/profile/profile.styles";
 import { formatDistanceToNow } from "date-fns";
@@ -20,12 +19,7 @@ import {
 } from "@expo/vector-icons";
 import PlaceCard from "@/components/profile/PlaceCard";
 import Colors from "@/constants/Colors";
-import { Alert } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUserData, logout } from "@/features/userSlice";
-import { RootState } from "@/store/store";
-import { ThunkDispatch } from "@reduxjs/toolkit";
-import LandingPage from "@/components/profile/LandingPage";
+import CustomUserImage from "@/components/CustomUserImage";
 
 interface Place {
   _id: string;
@@ -54,8 +48,29 @@ interface Place {
   likedBy: string[];
 }
 
+interface User {
+  id: string;
+  email: string;
+  password: string;
+  fullname: string;
+  phone: string;
+  bio: string;
+  job: string;
+  lang: string;
+  location: string;
+  profilepic: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  host: boolean;
+  Superhost: boolean;
+  followers: string[];
+  likedPosts: string[];
+}
+
 const Page = () => {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
 
   // States
   const [UserPlaces, setUserPlaces] = useState<Place>();
@@ -63,16 +78,27 @@ const Page = () => {
   const [StartedHosting, setStartedHosting] = useState("Not a Host");
   const [TotalReviews, setTotalReviews] = useState<number>(0);
   const [AverageRating, setAverageRating] = useState("");
+  const [Loading, setLoading] = useState(false);
+  const [User, setUser] = useState<User>();
 
-  // Redux (User Data)
-  type AppDispatch = ThunkDispatch<RootState, unknown, any>;
-  const dispatch: AppDispatch = useDispatch();
-  const { Loading, User, error } = useSelector(
-    (state: RootState) => state.user
-  );
+  // Getting user
   useEffect(() => {
-    dispatch(fetchUserData());
-  }, [dispatch]);
+    const getUser = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/user/${id}`
+        );
+        setUser(data);
+      } catch (error) {
+        console.log("Error getting user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUser();
+  }, []);
 
   // Getting user places and likes
   useEffect(() => {
@@ -130,46 +156,21 @@ const Page = () => {
     }
   }, [UserPlaces]);
 
-  // logout
-  const logOut = async () => {
-    try {
-      Alert.alert(
-        "Confirm Logout",
-        "Are you sure you want to log out?",
-        [
-          {
-            text: "No",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          {
-            text: "Yes",
-            onPress: async () => {
-              await AsyncStorage.setItem(
-                "user_session",
-                JSON.stringify({
-                  number: "",
-                  token: "",
-                  userId: "",
-                })
-              );
-              dispatch(logout());
-              router.replace("/(tabs)/profile");
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    } catch (e) {
-      console.log("Error");
-    }
-  };
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, paddingTop: 0 }}>
       <Stack.Screen
         options={{
-          headerShown: false,
+          headerTitle: "",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.headerleft}
+              onPress={() => router.back()}
+            >
+              <AntDesign name="arrowleft" size={20} color="black" />
+              <Text style={styles.headerleftText}>GO BACK</Text>
+            </TouchableOpacity>
+          ),
+          headerTransparent: true,
         }}
       />
       <ScrollView style={{ backgroundColor: "#fff" }}>
@@ -177,19 +178,9 @@ const Page = () => {
           <View>
             <View style={styles.container}>
               <View style={styles.UserCard}>
-                <View style={styles.logoutBtn}>
-                  <TouchableOpacity>
-                    <AntDesign name="edit" size={24} color="black" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={logOut}>
-                    <AntDesign name="logout" size={22} color={"#e83636"} />
-                  </TouchableOpacity>
-                </View>
-
                 <View style={styles.UserCardTop}>
-                  <Image
-                    source={{ uri: User?.profilepic }}
+                  <CustomUserImage
+                    source={User?.profilepic}
                     style={styles.UserCardImg}
                     resizeMode="cover"
                   />
@@ -309,7 +300,9 @@ const Page = () => {
 
             <View style={styles.containerleft}>
               <View style={styles.about}>
-                <Text style={styles.aboutheaderText}>About you</Text>
+                <Text style={styles.aboutheaderText}>
+                  {`About ${User.fullname}`}
+                </Text>
 
                 <View style={{ gap: 20 }}>
                   <View style={styles.aboutView}>
@@ -334,7 +327,9 @@ const Page = () => {
               </View>
 
               <View style={styles.listingsheader}>
-                <Text style={styles.aboutheaderText}>Your listings</Text>
+                <Text style={styles.aboutheaderText}>
+                  {`${User.fullname}'s listings`}
+                </Text>
               </View>
 
               {Array.isArray(UserPlaces) && UserPlaces.length > 0 ? (
@@ -352,7 +347,9 @@ const Page = () => {
               )}
 
               <View style={styles.listingsheader}>
-                <Text style={styles.aboutheaderText}>Your likes</Text>
+                <Text style={styles.aboutheaderText}>
+                  {`${User.fullname}'s likes`}
+                </Text>
               </View>
 
               {UserLikes && Array.isArray(UserLikes) ? (
@@ -371,8 +368,6 @@ const Page = () => {
             </View>
           </View>
         )}
-
-        {!User && !Loading && <LandingPage />}
 
         {Loading && (
           <View style={styles.container}>

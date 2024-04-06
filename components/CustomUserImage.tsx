@@ -7,7 +7,7 @@ export default function CustomUserImage({
   if (typeof source === "string") {
     source = source.includes("https://")
       ? source
-      : "https://roomsy-v3-server.vercel.app/server/routes/" + source;
+      : "https://roomsy-v3-server.vercel.app/" + source;
   }
 
   return <Image {...rest} source={{ uri: source }} />;

@@ -14,20 +14,29 @@ import styles from "@/app/(modals)/login.styles";
 import axios from "axios";
 import UseToast from "@/widgets/Toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { signup } from "@/features/registrationTypeSlice";
 
-const SignInForm = ({ setRegistrationType }: any) => {
+const SignInForm = () => {
   const router = useRouter();
 
+  // county picker
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("");
   const [countryName, setCountryName] = useState("");
 
+  // states
   const [Loading, setLoading] = useState(false);
   const [FormError, setFormError] = useState("");
 
+  // data
   const [number, setnumber] = useState("");
   const [password, setpassword] = useState("");
 
+  // registration type
+  const dispatch = useDispatch();
+
+  // api call
   const login = async () => {
     try {
       const phone = countryCode + number;
@@ -63,17 +72,17 @@ const SignInForm = ({ setRegistrationType }: any) => {
     }
   };
 
-  function handleSignIn() {
-    password && number && countryCode
-      ? login()
-      : setFormError("All fields are required");
-  }
-
+  // form handling
   useEffect(() => {
     if (password && number && countryCode) {
       setFormError("");
     }
   }, [password, number, countryCode]);
+  function handleSignIn() {
+    password && number && countryCode
+      ? login()
+      : setFormError("All fields are required");
+  }
 
   return (
     <View>
@@ -83,7 +92,7 @@ const SignInForm = ({ setRegistrationType }: any) => {
             Sign in
           </Text>
           <View style={styles.toptextcontainer}>
-            <TouchableOpacity onPress={() => setRegistrationType("signup")}>
+            <TouchableOpacity onPress={() => dispatch(signup())}>
               <Text
                 style={{
                   fontFamily: "popLight",
@@ -99,7 +108,7 @@ const SignInForm = ({ setRegistrationType }: any) => {
 
         <TouchableOpacity
           style={styles.topiconcontainer}
-          onPress={() => router.replace("/(tabs)")}
+          onPress={() => router.back()}
         >
           <Ionicons name="close-outline" size={24} color="black" />
         </TouchableOpacity>
