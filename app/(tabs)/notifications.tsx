@@ -19,12 +19,11 @@ const Page = () => {
           justifyContent: "center",
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ alignItems: "center", gap: 10 }}>
           <Ionicons
             name="notifications-off-outline"
             size={24}
             color="black"
-            style={{ marginBottom: 5 }}
           />
           <Text style={{ fontFamily: "popRegular", fontSize: 18 }}>
             No Notifications

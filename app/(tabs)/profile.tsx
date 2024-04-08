@@ -77,29 +77,33 @@ const Page = () => {
   // Getting user places and likes
   useEffect(() => {
     const getUserPlaces = async () => {
-      try {
-        const { data } = await axios.get(
-          `https://roomsy-v3-server.vercel.app/api/placeByowner/${User?.id}`
-        );
-        setUserPlaces(data);
-        if (data && data.length > 0) {
-          const dateString = data[0]?.createdAt;
-          const date = new Date(dateString);
-          setStartedHosting(formatDistanceToNow(date));
+      if (User) {
+        try {
+          const { data } = await axios.get(
+            `https://roomsy-v3-server.vercel.app/api/placeByowner/${User?.id}`
+          );
+          setUserPlaces(data);
+          if (data && data.length > 0) {
+            const dateString = data[0]?.createdAt;
+            const date = new Date(dateString);
+            setStartedHosting(formatDistanceToNow(date));
+          }
+        } catch (error) {
+          console.log("error getting User Places");
         }
-      } catch (error) {
-        console.log("error getting User Places");
       }
     };
 
     const getUserLikes = async () => {
-      try {
-        const { data } = await axios.get(
-          `https://roomsy-v3-server.vercel.app/api/placeBylikes/${User?.id}`
-        );
-        setUserLikes(data);
-      } catch (error) {
-        console.log("error getting User Likes");
+      if (User) {
+        try {
+          const { data } = await axios.get(
+            `https://roomsy-v3-server.vercel.app/api/placeBylikes/${User?.id}`
+          );
+          setUserLikes(data);
+        } catch (error) {
+          console.log("error getting User Likes");
+        }
       }
     };
 

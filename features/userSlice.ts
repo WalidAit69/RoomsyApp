@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 
 interface User {
   id: string;
@@ -27,12 +26,14 @@ interface UserState {
   User: User | null;
   Loading: boolean;
   error: any | null;
+  userData: any | null;
 }
 
 const initialState: UserState = {
   User: null,
   Loading: false,
   error: null,
+  userData: null,
 };
 
 export const fetchUserData = createAsyncThunk(
@@ -40,16 +41,16 @@ export const fetchUserData = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const jsonValue = await AsyncStorage.getItem("user_session");
-      const UserData = jsonValue != null ? JSON.parse(jsonValue) : null;
+      const User = jsonValue != null ? JSON.parse(jsonValue) : null;
 
-      if (!UserData || !UserData.userId) {
+      if (!User.userId) {
         return rejectWithValue("User session not found");
+      } else {
+        const { data } = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/user/${User.userId}`
+        );
+        return data;
       }
-
-      const { data } = await axios.get(
-        `https://roomsy-v3-server.vercel.app/api/user/${UserData.userId}`
-      );
-      return data;
     } catch (error) {
       console.log("Error getting user data:", error);
       return rejectWithValue("Error getting user data");
@@ -58,7 +59,7 @@ export const fetchUserData = createAsyncThunk(
 );
 
 const userSlice = createSlice({
-  name: "User",
+  name: "user",
   initialState,
   reducers: {
     logout: (state) => {
@@ -69,6 +70,8 @@ const userSlice = createSlice({
     builder
       .addCase(fetchUserData.pending, (state) => {
         state.Loading = true;
+        state.User = null;
+        state.error = null;
       })
       .addCase(fetchUserData.fulfilled, (state, action) => {
         state.Loading = false;
@@ -78,6 +81,7 @@ const userSlice = createSlice({
       .addCase(fetchUserData.rejected, (state, action) => {
         state.Loading = false;
         state.error = action.payload;
+        state.User = null;
       });
   },
 });

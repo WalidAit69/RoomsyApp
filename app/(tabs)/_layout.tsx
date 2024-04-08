@@ -11,6 +11,7 @@ const Layout = () => {
       screenOptions={{
         tabBarActiveTintColor: Colors.maincolor,
         tabBarShowLabel: false,
+        // tabBarActiveBackgroundColor: "red",
       }}
     >
       <Tabs.Screen
@@ -26,7 +27,7 @@ const Layout = () => {
         name="bookings"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart-outline" size={size} color={color} />
+            <AntDesign name="calendar" size={size} color={color} />
           ),
         }}
       />

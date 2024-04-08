@@ -48,7 +48,6 @@ const SignInForm = () => {
           password: password,
         }
       );
-      console.log();
       try {
         await AsyncStorage.setItem(
           "user_session",
@@ -56,6 +55,7 @@ const SignInForm = () => {
             number: phone,
             token: response.data.accesstoken,
             userId: response.data.id,
+            userPhoto: response.data.userPhoto,
           })
         );
       } catch (e) {
