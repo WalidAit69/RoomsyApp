@@ -69,6 +69,13 @@ function RootLayoutNav() {
               animation: "fade",
             }}
           />
+
+          <Stack.Screen
+            name="(modals)/bookingPage"
+            options={{
+              presentation: "modal",
+            }}
+          />
         </Stack>
       </RootSiblingParent>
     </Provider>

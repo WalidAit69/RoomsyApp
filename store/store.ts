@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "@/features/userSlice";
+import bookingReducer from "@/features/userbookingsSlice";
 import RegisterReducer from "@/features/registrationTypeSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    bookings: bookingReducer,
     registrationtype: RegisterReducer,
   },
 });

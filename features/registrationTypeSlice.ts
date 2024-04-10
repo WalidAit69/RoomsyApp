@@ -8,7 +8,7 @@ const initialState: RegisterState = {
   RegistrationType: "",
 };
 
-export const registrationSlice = createSlice({
+const registrationSlice = createSlice({
   name: "RegistrationType",
   initialState,
   reducers: {
@@ -20,7 +20,6 @@ export const registrationSlice = createSlice({
     },
   },
 });
-
 
 export const { signup, signin } = registrationSlice.actions;
 

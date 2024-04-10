@@ -10,16 +10,24 @@ interface Review {
   userName: string;
   userPhoto: string;
   _id: string;
+  createdAt: any;
 }
 
 const ReviewCard = ({ review }: { review: Review }) => {
-
+  // images
   let src = "";
-
   src =
     review?.userPhoto && review?.userPhoto.includes("https://")
       ? review?.userPhoto
       : "https://roomsy-v3-server.vercel.app/" + review?.userPhoto;
+
+  // format date
+  function formatDate(inputDate: string) {
+    const date = new Date(inputDate);
+    const month = date.toLocaleString("default", { month: "short" });
+    const day = date.getDate();
+    return `${month} ${day}`;
+  }
 
   return (
     <View style={styles.ReviewContainer}>
@@ -31,7 +39,9 @@ const ReviewCard = ({ review }: { review: Review }) => {
         />
         <View>
           <Text style={styles.reviewname}>{review.userName}</Text>
-          <Text style={styles.reviewdate}>July 2023</Text>
+          <Text style={styles.reviewdate}>
+            {review.createdAt ? formatDate(review.createdAt) : "July 2023"}
+          </Text>
         </View>
       </View>
 

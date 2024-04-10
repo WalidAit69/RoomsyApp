@@ -7,8 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
 import BookingCard from "@/components/Booking/BookingCard";
 import Colors from "@/constants/Colors";
@@ -17,59 +16,91 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchUserData } from "@/features/userSlice";
 import CustomUserImage from "@/components/CustomUserImage";
+import { fetchBookings } from "@/features/userbookingsSlice";
 
+interface User {
+  _id: string;
+  email: string;
+  password: string;
+  fullname: string;
+  phone: string;
+  bio: string;
+  job: string;
+  lang: string;
+  location: string;
+  profilepic: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  host: boolean;
+  Superhost: boolean;
+  followers: string[];
+  likedPosts: string[];
+}
+
+interface Place {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  address: string;
+  city: string;
+  country: string;
+  images: string[];
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  livingRooms: number;
+  kitchens: number;
+  perks: string[];
+  extrainfo: string;
+  userNumber: string;
+  checkIn: string;
+  checkOut: string;
+  maxGuests: number;
+  owner: {
+    fullname: string;
+    phone: string;
+    profilepic: string;
+    _id: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  likedBy: string[];
+}
+
+interface Booking {
+  _id: string;
+  place: Place;
+  user: User;
+  host: string;
+  checkin: string;
+  checkout: string;
+  guests: string;
+  Username: string;
+  Userphone: string;
+  fullprice: string;
+  halfprice: string;
+  worktrip: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const Page = () => {
   const router = useRouter();
 
-  // data
-  const [bookings, setbookings] = useState<any>();
-  const [Booked, setBooked] = useState<any>();
-  const [isLoading, setisLoading] = useState(false);
-
-  // getting user with redux
+  // getting user and bookings with redux
   const dispatch: AppDispatch = useDispatch();
   const { User, Loading } = useSelector((state: RootState) => state.user);
+  const { Booked, Booking, isLoading } = useSelector(
+    (state: RootState) => state.bookings
+  );
   useEffect(() => {
     dispatch(fetchUserData());
+    dispatch(fetchBookings());
   }, []);
 
-
-  // getting data
-  async function getBookings() {
-    if (User) {
-      try {
-        setisLoading(true);
-        const { data } = await axios.get(
-          `https://roomsy-v3-server.vercel.app/api/BookingPlaces/${User?.id}`
-        );
-        setbookings(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setisLoading(false);
-      }
-    }
-  }
-  async function getBooked() {
-    if (User) {
-      try {
-        const { data } = await axios.get(
-          `https://roomsy-v3-server.vercel.app/api/Booked/${User?.id}`
-        );
-        setBooked(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }
-  useEffect(() => {
-    if (User) {
-      getBookings();
-      getBooked();
-    }
-  }, [User]);
- 
   return (
     <>
       <ScrollView style={{ backgroundColor: "#fff", flex: 1 }}>
@@ -91,7 +122,7 @@ const Page = () => {
               </TouchableOpacity>
             ),
             headerShadowVisible: false,
-            headerShown: !bookings && !Booked ? false : true,
+            headerShown: !Booking && !Booked ? false : true,
             headerTitleStyle: {
               fontFamily: "popMedium",
             },
@@ -99,17 +130,19 @@ const Page = () => {
             headerTransparent: true,
           }}
         />
-        {!isLoading && (Booked || bookings) && User && (
+        {!isLoading && (Booked || Booking) && User && (
           <View style={{ marginTop: 100 }}>
-            <View style={{ alignItems: "center", marginTop: bookings && 20 }}>
-              {bookings && (
+            <View style={{ alignItems: "center", marginTop: Booking && 20 }}>
+              {Booking && (
                 <Text style={[styles.container, styles.title]}>
                   My bookings
                 </Text>
               )}
               <FlatList
-                data={bookings}
-                renderItem={(booking: any) => <BookingCard {...booking.item} />}
+                data={Booking}
+                renderItem={({ item }: { item: Booking }) => (
+                  <BookingCard booking={item} isBooking={"Yes"} currentuserid={User.id}/>
+                )}
                 keyExtractor={(booking) => booking._id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -126,8 +159,8 @@ const Page = () => {
               )}
               <View style={{ gap: 15 }}>
                 {Booked &&
-                  Booked.map((booking: any) => (
-                    <BookingCard {...booking} key={booking._id} />
+                  Booked.map((booking: Booking) => (
+                    <BookingCard booking={booking} key={booking._id} />
                   ))}
               </View>
             </View>
@@ -143,7 +176,7 @@ const Page = () => {
         )}
       </ScrollView>
 
-      {!isLoading && !bookings && !Booked && !Loading && (
+      {!isLoading && !Booking && !Booked && !Loading && (
         <View style={styles.center}>
           <MaterialCommunityIcons
             name="calendar-remove-outline"

@@ -231,7 +231,7 @@ const Page = () => {
 
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardtext}>
-                  {User?.fullname}'s confirmed informations
+                  Your confirmed informations
                 </Text>
                 <View
                   style={{

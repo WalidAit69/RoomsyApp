@@ -77,6 +77,7 @@ interface review {
   userName: string;
   userPhoto: string;
   _id: string;
+  createdAt: any;
 }
 
 interface UserData {
@@ -237,12 +238,13 @@ const Page = () => {
     setModalVisible(!modalVisible);
   };
 
+  // navigation
   const handleNavigate = () => {
     UserData?.userId === Place?.owner._id
       ? router.push("/profile")
       : router.push(`/userpage/${Place?.owner._id}`);
   };
-
+  
   return (
     <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
       <Stack.Screen
@@ -353,9 +355,7 @@ const Page = () => {
                   <Text style={styles.hostText}>by {Place.owner.fullname}</Text>
                 </View>
 
-                <TouchableOpacity
-                  onPress={handleNavigate}
-                >
+                <TouchableOpacity onPress={handleNavigate}>
                   <CustomUserImage
                     source={Place.owner.profilepic}
                     resizeMode="cover"
