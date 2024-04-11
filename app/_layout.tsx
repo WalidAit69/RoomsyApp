@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { RootSiblingParent } from "react-native-root-siblings";
 import { store } from "@/store/store";
 import { Provider } from "react-redux";
+import { Platform } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -74,6 +75,7 @@ function RootLayoutNav() {
             name="(modals)/bookingPage"
             options={{
               presentation: "modal",
+              headerShown: Platform.OS === "ios" && false,
             }}
           />
         </Stack>

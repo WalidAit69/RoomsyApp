@@ -191,7 +191,7 @@ const bookingPage = () => {
               </View>
             ),
             headerTransparent: true,
-            headerShown: placeimages && Platform.OS == "android" ? true : false,
+            headerShown: placeimages ? true : false,
             headerBackground: () => (
               <Animated.View style={[headerAnimatedStyle, styles.header]} />
             ),
@@ -378,6 +378,7 @@ const bookingPage = () => {
                         placeholder="Write your review"
                         multiline
                         onChangeText={setcomment}
+                        placeholderTextColor={Colors.bordercolor}
                       />
                     </View>
 

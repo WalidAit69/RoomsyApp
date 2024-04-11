@@ -77,7 +77,7 @@ interface review {
   userName: string;
   userPhoto: string;
   _id: string;
-  createdAt: any;
+  createdAt: string;
 }
 
 interface UserData {

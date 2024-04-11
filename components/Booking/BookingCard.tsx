@@ -10,7 +10,7 @@ import CustomImage from "../CustomImage";
 import Colors from "@/constants/Colors";
 import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
 import { differenceInCalendarDays } from "date-fns";
-import Animated, { SlideInLeft, SlideInRight } from "react-native-reanimated";
+import Animated, { FadeInUp, SlideInRight } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 
 interface User {
@@ -154,7 +154,7 @@ const BookingCard = ({
   };
 
   return (
-    <Animated.View entering={SlideInLeft} exiting={SlideInRight}>
+    <Animated.View entering={FadeInUp} exiting={SlideInRight}>
       <TouchableOpacity
         style={[styles.container, { width: width - 20 }]}
         onPress={() => handleClick(booking)}

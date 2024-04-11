@@ -2,9 +2,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "@/features/userSlice";
 import bookingReducer from "@/features/userbookingsSlice";
 import RegisterReducer from "@/features/registrationTypeSlice";
+import placeReducer from "@/features/placeSlice";
 
 export const store = configureStore({
   reducer: {
+    place: placeReducer,
     user: userReducer,
     bookings: bookingReducer,
     registrationtype: RegisterReducer,

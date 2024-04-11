@@ -37,7 +37,6 @@ interface Place {
   };
   createdAt: string;
   updatedAt: string;
-  __v: number;
   likedBy: string[];
   reviews: review[];
 }

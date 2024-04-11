@@ -6,59 +6,31 @@ import axios from "axios";
 import PlacesMap from "@/components/explore/PlacesMap";
 import PlacesBottomSheet from "@/components/explore/PlacesBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { ChangeCategory, fetchPlaces } from "@/features/placeSlice";
+import { ThunkDispatch } from "@reduxjs/toolkit";
+
+type AppDispatch = ThunkDispatch<RootState, unknown, any>;
 
 const Page = () => {
+  const dispatch: AppDispatch = useDispatch();
+
+  // data
   const [category, setcategory] = useState("All");
   const [FadeRight, setFadeRight] = useState(false);
-  const [AllPlaces, setAllPlaces] = useState();
-  const [PlacesByCat, setPlacesByCat] = useState();
-  const [Loading, setLoading] = useState(false);
-  const [NumberofPlaces, setNumberofPlaces] = useState(0);
-  const [SlicedPlaces, setSlicedPlaces] = useState();
-
-  // get all places
-  const getPlaces = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        "https://roomsy-v3-server.vercel.app/api/places"
-      );
-      setAllPlaces(data);
-      setSlicedPlaces(data.slice(0, 5));
-      setNumberofPlaces(data.length);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // get places by category
-  const getPlacesByCategory = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(
-        `https://roomsy-v3-server.vercel.app/api/placesByType/${category}`
-      );
-      setPlacesByCat(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // handle category change
   const onCategoryChanged = (category: string) => {
     setcategory(category);
   };
 
+  // get all places
+  const { Place, SlicedPlace, Loading } = useSelector(
+    (state: RootState) => state.place
+  );
   useEffect(() => {
-    getPlacesByCategory();
-  }, [category]);
-
-  useEffect(() => {
-    getPlaces();
+    dispatch(fetchPlaces());
   }, []);
 
   return (
@@ -75,16 +47,15 @@ const Page = () => {
           }}
         />
 
-        <PlacesMap AllPlaces={AllPlaces} />
+        <PlacesMap AllPlaces={Place} />
 
         <PlacesBottomSheet
-          PlacesByCat={PlacesByCat}
           category={category}
           FadeRight={FadeRight}
-          NumberofPlaces={NumberofPlaces}
-          AllPlaces={SlicedPlaces}
-          setAllPlaces={setSlicedPlaces}
+          AllPlaces={SlicedPlace}
           Loading={Loading}
+          Place={Place}
+          NumberofPlaces={Place?.length}
         />
       </SafeAreaView>
     </GestureHandlerRootView>

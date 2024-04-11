@@ -40,7 +40,7 @@ const ReviewCard = ({ review }: { review: Review }) => {
         <View>
           <Text style={styles.reviewname}>{review.userName}</Text>
           <Text style={styles.reviewdate}>
-            {review.createdAt ? formatDate(review.createdAt) : "July 2023"}
+            {review.createdAt ? formatDate(review.createdAt) : "July 23"}
           </Text>
         </View>
       </View>

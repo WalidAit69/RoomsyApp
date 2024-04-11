@@ -143,6 +143,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
     borderRadius: 10,
+    fontFamily: "popRegular",
+    paddingTop: 15 ,
   },
   reviewbtn: {
     backgroundColor: Colors.maincolor,

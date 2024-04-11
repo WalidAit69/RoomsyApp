@@ -15,6 +15,16 @@ interface InitialRegion {
   longitudeDelta: number;
 }
 
+interface review {
+  comment: string;
+  rating: number;
+  userId: string;
+  userName: string;
+  userPhoto: string;
+  _id: string;
+  createdAt: string;
+}
+
 interface Place {
   _id: string;
   title: string;
@@ -35,16 +45,22 @@ interface Place {
   checkIn: string;
   checkOut: string;
   maxGuests: number;
-  owner: string;
+  owner: {
+    fullname: string;
+    phone: string;
+    profilepic: string;
+    _id: string;
+  };
   createdAt: string;
   updatedAt: string;
   __v: number;
   likedBy: string[];
+  reviews: review[];
   latitude: number;
   longitude: number;
 }
 
-const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | undefined }) => {
+const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
   // refs
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
