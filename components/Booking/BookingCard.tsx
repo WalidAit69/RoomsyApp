@@ -153,6 +153,26 @@ const BookingCard = ({
     });
   };
 
+  // rendering nights
+  const nights = () => {
+    return (
+      <View style={[styles.row, { columnGap: 8, flexWrap: "wrap" }]}>
+        <Text style={styles.textlight}>{numberofDays} nights:</Text>
+        <View style={[styles.row, { columnGap: 8 }]}>
+          <View style={[styles.row, { gap: 4 }]}>
+            <FontAwesome5 name="plane-departure" style={styles.textlight} />
+            <Text style={styles.textlight}>{formatDate(booking.checkin)}</Text>
+          </View>
+          <AntDesign name="arrowright" style={styles.textlight} />
+          <View style={[styles.row, { gap: 4 }]}>
+            <FontAwesome5 name="plane-arrival" style={styles.textlight} />
+            <Text style={styles.textlight}>{formatDate(booking.checkin)}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <Animated.View entering={FadeInUp} exiting={SlideInRight}>
       <TouchableOpacity
@@ -175,22 +195,7 @@ const BookingCard = ({
             </Text>
           </View>
 
-          <View style={[styles.row, { gap: 8 }]}>
-            <Text style={styles.textlight}>{numberofDays} nights:</Text>
-            <View style={[styles.row, { gap: 4 }]}>
-              <FontAwesome5 name="plane-departure" style={styles.textlight} />
-              <Text style={styles.textlight}>
-                {formatDate(booking.checkin)}
-              </Text>
-            </View>
-            <AntDesign name="arrowright" style={styles.textlight} />
-            <View style={[styles.row, { gap: 4 }]}>
-              <FontAwesome5 name="plane-arrival" style={styles.textlight} />
-              <Text style={styles.textlight}>
-                {formatDate(booking.checkin)}
-              </Text>
-            </View>
-          </View>
+          {nights()}
 
           <Text style={styles.textdark}>
             Total price $
@@ -218,7 +223,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
   },
   rightcontainer: {
-    // backgroundColor: "red",
     width: "60%",
     paddingLeft: 10,
     gap: 10,

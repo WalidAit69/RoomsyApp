@@ -30,6 +30,7 @@ import StarRating from "react-native-star-rating-widget";
 import axios from "axios";
 import UseToast from "@/widgets/Toast";
 import { RootSiblingParent } from "react-native-root-siblings";
+import * as Hasptics from "expo-haptics";
 
 const bookingPage = () => {
   const IMG_HEIGHT = 500;
@@ -65,6 +66,7 @@ const bookingPage = () => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const sharePlace = async () => {
+    Hasptics.impactAsync(Hasptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
         title: placetitle.toString(),

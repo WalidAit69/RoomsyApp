@@ -96,21 +96,31 @@ export const fetchBookings = createAsyncThunk(
         return rejectWithValue("User session not found");
       }
 
-      const bookingResponse = await axios.get(
-        `https://roomsy-v3-server.vercel.app/api/BookingPlaces/${User.userId}`
-      );
+      let bookingResponse;
+      let bookedResponse;
 
-      const bookedResponse = await axios.get(
-        `https://roomsy-v3-server.vercel.app/api/Booked/${User.userId}`
-      );
+      try {
+        bookingResponse = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/BookingPlaces/${User.userId}`
+        );
+      } catch (error) {
+        console.log("Error getting bookings:", error);
+      }
 
-      const bookingData = bookingResponse.data;
-      const bookedData = bookedResponse.data;
+      try {
+        bookedResponse = await axios.get(
+          `https://roomsy-v3-server.vercel.app/api/Booked/${User.userId}`
+        );
+      } catch (error) {
+        console.log("Error getting booked places:", error);
+      }
+
+      const bookingData = bookingResponse?.data;
+      const bookedData = bookedResponse?.data;
 
       return { bookingData, bookedData };
     } catch (error) {
-      console.log("Error getting bookings:", error);
-      return rejectWithValue("Error getting bookings");
+      console.log("Error", error);
     }
   }
 );
@@ -129,13 +139,13 @@ const bookingsSlice = createSlice({
       })
       .addCase(fetchBookings.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.Booking = action.payload.bookingData;
-        state.Booked = action.payload.bookedData;
+        state.Booking = action.payload?.bookingData;
+        state.Booked = action.payload?.bookedData;
         state.error = null;
       })
-      .addCase(fetchBookings.rejected, (state, action) => {
+      .addCase(fetchBookings.rejected, (state) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = "something went wrong";
         state.Booking = null;
         state.Booked = null;
       });

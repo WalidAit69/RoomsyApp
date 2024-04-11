@@ -11,12 +11,18 @@ import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
 import BookingCard from "@/components/Booking/BookingCard";
 import Colors from "@/constants/Colors";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  FontAwesome6,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchUserData } from "@/features/userSlice";
 import CustomUserImage from "@/components/CustomUserImage";
 import { fetchBookings } from "@/features/userbookingsSlice";
+import * as Haptics from "expo-haptics";
 
 interface User {
   _id: string;
@@ -92,7 +98,9 @@ const Page = () => {
 
   // getting user and bookings with redux
   const dispatch: AppDispatch = useDispatch();
-  const { User, Loading } = useSelector((state: RootState) => state.user);
+  const { User, Loading, error } = useSelector(
+    (state: RootState) => state.user
+  );
   const { Booked, Booking, isLoading } = useSelector(
     (state: RootState) => state.bookings
   );
@@ -133,36 +141,109 @@ const Page = () => {
         {!isLoading && (Booked || Booking) && User && (
           <View style={{ marginTop: 100 }}>
             <View style={{ alignItems: "center", marginTop: Booking && 20 }}>
-              {Booking && (
-                <Text style={[styles.container, styles.title]}>
-                  My bookings
-                </Text>
+              <Text style={[styles.container, styles.title]}>My bookings</Text>
+
+              {Booking ? (
+                <FlatList
+                  data={Booking}
+                  renderItem={({ item }: { item: Booking }) => (
+                    <BookingCard
+                      booking={item}
+                      isBooking={"Yes"}
+                      currentuserid={User.id}
+                    />
+                  )}
+                  keyExtractor={(booking) => booking._id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.container,
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: "popRegular",
+                      opacity: 0.6,
+                    }}
+                  >
+                    You have no bookings
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push("/(tabs)");
+                    }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    <Text
+                      style={[styles.btntext, { color: "black", marginTop: 1 }]}
+                    >
+                      Explore
+                    </Text>
+                    <FontAwesome6 name="angle-right" size={15} color="black" />
+                  </TouchableOpacity>
+                </View>
               )}
-              <FlatList
-                data={Booking}
-                renderItem={({ item }: { item: Booking }) => (
-                  <BookingCard booking={item} isBooking={"Yes"} currentuserid={User.id}/>
-                )}
-                keyExtractor={(booking) => booking._id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-              />
             </View>
 
             <View
               style={{ alignItems: "center", marginVertical: Booked && 20 }}
             >
-              {Booked && (
-                <Text style={[styles.container, styles.title]}>
-                  My booked places
-                </Text>
+              <Text
+                style={[
+                  styles.container,
+                  styles.title,
+                  { marginTop: Booked ? 0 : 15 },
+                ]}
+              >
+                My booked places
+              </Text>
+
+              {Booked ? (
+                <View style={{ gap: 15 }}>
+                  {Booked &&
+                    Booked.map((booking: Booking) => (
+                      <BookingCard booking={booking} key={booking._id} />
+                    ))}
+                </View>
+              ) : (
+                <View style={[styles.container]}>
+                  {User.host ? (
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontFamily: "popRegular",
+                        opacity: 0.6,
+                      }}
+                    >
+                      You have no booked places
+                    </Text>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.btn}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                    >
+                      <Text style={styles.btntext}>Start hosting</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
-              <View style={{ gap: 15 }}>
-                {Booked &&
-                  Booked.map((booking: Booking) => (
-                    <BookingCard booking={booking} key={booking._id} />
-                  ))}
-              </View>
             </View>
           </View>
         )}
@@ -229,6 +310,20 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
+  },
+  btn: {
+    backgroundColor: "black",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "50%",
+    paddingVertical: 20,
+    borderRadius: 8,
+    alignSelf: "center",
+    marginTop: 10,
+  },
+  btntext: {
+    color: "white",
+    fontFamily: "popMedium",
   },
 });
 
