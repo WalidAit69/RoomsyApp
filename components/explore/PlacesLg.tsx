@@ -50,15 +50,7 @@ interface review {
   _id: string;
 }
 
-const PlacesLg = ({
-  place,
-  FadeRight,
-  Loading,
-}: {
-  place: Place;
-  FadeRight?: boolean;
-  Loading?: boolean;
-}) => {
+const PlacesLg = ({ place, Loading }: { place: Place; Loading?: boolean }) => {
   const CalculateAverageRating = () => {
     if (!place.reviews || place.reviews.length === 0) {
       return 0;
@@ -78,7 +70,7 @@ const PlacesLg = ({
     <View style={styles.container}>
       <Animated.View
         style={styles.PlaceCard}
-        entering={FadeRight ? FadeInLeft : FadeInRight}
+        entering={FadeInRight}
         exiting={FadeOutLeft}
       >
         <View style={{ position: "relative" }}>
@@ -95,7 +87,9 @@ const PlacesLg = ({
             {place.images.slice(0, 5).map((image, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => router.push(`/listing/${place._id}`)}
+                onPress={() => {
+                  router.push(`/listing/${place._id}`);
+                }}
                 style={{ alignItems: "center", justifyContent: "center" }}
               >
                 <Animated.Image

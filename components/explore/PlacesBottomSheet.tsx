@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { AddtoSlicedPlace, ChangeCategory } from "@/features/placeSlice";
 import { useDispatch } from "react-redux";
+import * as Haptics from "expo-haptics";
 
 interface review {
   comment: string;
@@ -63,7 +64,6 @@ interface Place {
 
 interface Props {
   category: string;
-  FadeRight: boolean;
   AllPlaces: Place[] | null;
   Place: Place[] | null;
   NumberofPlaces: number | undefined;
@@ -72,7 +72,6 @@ interface Props {
 
 const PlacesBottomSheet = ({
   category,
-  FadeRight,
   AllPlaces,
   Loading,
   Place,
@@ -138,6 +137,7 @@ const PlacesBottomSheet = ({
 
   // show map
   const ShowMap = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     bottomSheetRef.current?.collapse();
     setrefresh(refresh + 1);
   };
@@ -184,7 +184,6 @@ const PlacesBottomSheet = ({
               renderItem={({ item }) => (
                 <PlacesLg
                   place={item}
-                  FadeRight={FadeRight}
                   Loading={Loading}
                 />
               )}

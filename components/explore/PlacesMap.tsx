@@ -7,6 +7,8 @@ import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import Carousel from "pinar";
 import Colors from "@/constants/Colors";
+import * as Haptics from "expo-haptics";
+import UseToast from "@/widgets/Toast";
 
 interface InitialRegion {
   latitude: number;
@@ -99,10 +101,12 @@ const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
 
   // handle Location Button
   const onLocationClicked = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     if (initialRegion) {
       mapRef.current?.animateToRegion(initialRegion);
     } else {
-      console.error("Location Disabled");
+      UseToast({ msg: "Location disabled" || "Location disabled" });
     }
   };
 
@@ -124,7 +128,10 @@ const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
           AllPlaces.map((place: Place) => (
             <Marker
               key={place._id}
-              onPress={() => onMarkerSelected(place)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onMarkerSelected(place);
+              }}
               coordinate={{
                 latitude: place.latitude,
                 longitude: place.longitude,

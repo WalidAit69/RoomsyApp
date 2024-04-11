@@ -2,13 +2,12 @@ import { SafeAreaView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import ExploreHeader from "@/components/explore/ExploreHeader";
-import axios from "axios";
 import PlacesMap from "@/components/explore/PlacesMap";
 import PlacesBottomSheet from "@/components/explore/PlacesBottomSheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { ChangeCategory, fetchPlaces } from "@/features/placeSlice";
+import {  fetchPlaces } from "@/features/placeSlice";
 import { ThunkDispatch } from "@reduxjs/toolkit";
 
 type AppDispatch = ThunkDispatch<RootState, unknown, any>;
@@ -18,7 +17,6 @@ const Page = () => {
 
   // data
   const [category, setcategory] = useState("All");
-  const [FadeRight, setFadeRight] = useState(false);
 
   // handle category change
   const onCategoryChanged = (category: string) => {
@@ -41,7 +39,6 @@ const Page = () => {
             header: () => (
               <ExploreHeader
                 onCategoryChanged={onCategoryChanged}
-                setFadeRight={setFadeRight}
               />
             ),
           }}
@@ -51,7 +48,6 @@ const Page = () => {
 
         <PlacesBottomSheet
           category={category}
-          FadeRight={FadeRight}
           AllPlaces={SlicedPlace}
           Loading={Loading}
           Place={Place}

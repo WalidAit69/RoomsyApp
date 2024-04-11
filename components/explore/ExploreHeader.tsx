@@ -11,8 +11,8 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { AntDesign, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Colors from "@/constants/Colors";
 
+// categories list
 const categories = [
   {
     name: "All",
@@ -46,28 +46,32 @@ const categories = [
 
 interface Props {
   onCategoryChanged: (category: string) => void;
-  setFadeRight: any;
 }
 
-const ExploreHeader = ({ onCategoryChanged, setFadeRight }: Props) => {
+const ExploreHeader = ({ onCategoryChanged }: Props) => {
   const router = useRouter();
+
+  // Refs
   const catsRef = useRef<Array<TouchableOpacity | null>>([]);
   const ScrollRef = useRef<ScrollView>(null);
+
+  // Data
   const [activeIndex, setactiveIndex] = useState(0);
 
+  // HandleCLick
   const selectCategory = (index: number) => {
     const selected = catsRef.current[index];
     setactiveIndex(index);
 
-    if (index < activeIndex) {
-      setFadeRight(true);
+    if (Platform.OS === "ios") {
+      selected?.measure((x: number, y: number) => {
+        ScrollRef.current?.scrollTo({ x: x - 16, y: 0, animated: true });
+      });
     } else {
-      setFadeRight(false);
+      selected?.measureLayout(ScrollRef.current?.getInnerViewNode(), (x, y) => {
+        ScrollRef.current?.scrollTo({ x: x - 16, y: 0, animated: true });
+      });
     }
-
-    selected?.measure((x) => {
-      ScrollRef.current?.scrollTo({ x: x - 16, y: 0, animated: true });
-    });
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCategoryChanged(categories[index].name);
@@ -78,7 +82,10 @@ const ExploreHeader = ({ onCategoryChanged, setFadeRight }: Props) => {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => router.push("/(modals)/booking")}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/(modals)/booking");
+          }}
         >
           <View style={styles.actionRow}>
             <View style={styles.actionRowLeft}>
