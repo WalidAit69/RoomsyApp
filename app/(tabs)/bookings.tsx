@@ -23,6 +23,7 @@ import { fetchUserData } from "@/features/userSlice";
 import CustomUserImage from "@/components/CustomUserImage";
 import { fetchBookings } from "@/features/userbookingsSlice";
 import * as Haptics from "expo-haptics";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 interface User {
   _id: string;
@@ -130,7 +131,7 @@ const Page = () => {
               </TouchableOpacity>
             ),
             headerShadowVisible: false,
-            headerShown: !Booking && !Booked ? false : true,
+            headerShown: Loading && isLoading ? false : true,
             headerTitleStyle: {
               fontFamily: "popMedium",
             },
@@ -138,91 +139,45 @@ const Page = () => {
             headerTransparent: true,
           }}
         />
-        {!isLoading && (Booked || Booking) && User && (
-          <View style={{ marginTop: 100 }}>
-            <View style={{ alignItems: "center", marginTop: Booking && 20 }}>
-              <Text style={[styles.container, styles.title]}>My bookings</Text>
-
-              {Booking ? (
-                <FlatList
-                  data={Booking}
-                  renderItem={({ item }: { item: Booking }) => (
-                    <BookingCard
-                      booking={item}
-                      isBooking={"Yes"}
-                      currentuserid={User.id}
-                    />
-                  )}
-                  keyExtractor={(booking) => booking._id}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                />
-              ) : (
-                <View
-                  style={[
-                    styles.container,
-                    {
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    },
-                  ]}
+        {!isLoading &&
+          ((Booked && Booked?.length > 0) ||
+            (Booking && Booking?.length > 0)) &&
+          User && (
+            <View style={{ marginTop: 100 }}>
+              <View style={{ alignItems: "center", marginTop: Booking && 20 }}>
+                <Animated.Text
+                  entering={FadeIn}
+                  style={[styles.container, styles.title]}
                 >
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontFamily: "popRegular",
-                      opacity: 0.6,
-                    }}
+                  My bookings
+                </Animated.Text>
+
+                {Booking ? (
+                  <Animated.FlatList
+                    entering={FadeIn.delay(100)}
+                    data={Booking}
+                    renderItem={({ item }: { item: Booking }) => (
+                      <BookingCard
+                        booking={item}
+                        isBooking={"Yes"}
+                        currentuserid={User.id}
+                      />
+                    )}
+                    keyExtractor={(booking) => booking._id}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.container,
+                      {
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      },
+                    ]}
                   >
-                    You have no bookings
-                  </Text>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      router.push("/(tabs)");
-                    }}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 5,
-                    }}
-                  >
-                    <Text
-                      style={[styles.btntext, { color: "black", marginTop: 1 }]}
-                    >
-                      Explore
-                    </Text>
-                    <FontAwesome6 name="angle-right" size={15} color="black" />
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-
-            <View
-              style={{ alignItems: "center", marginVertical: Booked && 20 }}
-            >
-              <Text
-                style={[
-                  styles.container,
-                  styles.title,
-                  { marginTop: Booked ? 0 : 15 },
-                ]}
-              >
-                My booked places
-              </Text>
-
-              {Booked ? (
-                <View style={{ gap: 15 }}>
-                  {Booked &&
-                    Booked.map((booking: Booking) => (
-                      <BookingCard booking={booking} key={booking._id} />
-                    ))}
-                </View>
-              ) : (
-                <View style={[styles.container]}>
-                  {User.host ? (
                     <Text
                       style={{
                         fontSize: 14,
@@ -230,23 +185,91 @@ const Page = () => {
                         opacity: 0.6,
                       }}
                     >
-                      You have no booked places
+                      You have no bookings
                     </Text>
-                  ) : (
+
                     <TouchableOpacity
-                      style={styles.btn}
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push("/(tabs)");
+                      }}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 5,
                       }}
                     >
-                      <Text style={styles.btntext}>Start hosting</Text>
+                      <Text
+                        style={[
+                          styles.btntext,
+                          { color: "black", marginTop: 1 },
+                        ]}
+                      >
+                        Explore
+                      </Text>
+                      <FontAwesome6
+                        name="angle-right"
+                        size={15}
+                        color="black"
+                      />
                     </TouchableOpacity>
-                  )}
-                </View>
-              )}
+                  </View>
+                )}
+              </View>
+
+              <View
+                style={{ alignItems: "center", marginVertical: Booked && 20 }}
+              >
+                <Animated.Text
+                  entering={FadeIn.delay(200)}
+                  style={[
+                    styles.container,
+                    styles.title,
+                    { marginTop: Booked ? 0 : 15 },
+                  ]}
+                >
+                  My booked places
+                </Animated.Text>
+
+                {Booked ? (
+                  <Animated.View
+                    entering={FadeIn.delay(300)}
+                    style={{ gap: 15 }}
+                  >
+                    {Booked &&
+                      Booked.map((booking: Booking) => (
+                        <BookingCard booking={booking} key={booking._id} />
+                      ))}
+                  </Animated.View>
+                ) : (
+                  <View style={[styles.container]}>
+                    {User.host ? (
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "popRegular",
+                          opacity: 0.6,
+                        }}
+                      >
+                        You have no booked places
+                      </Text>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.btn}
+                        onPress={() => {
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light
+                          );
+                        }}
+                      >
+                        <Text style={styles.btntext}>Start hosting</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
         {(isLoading || Loading) && (
           <ActivityIndicator
@@ -257,18 +280,21 @@ const Page = () => {
         )}
       </ScrollView>
 
-      {!isLoading && !Booking && !Booked && !Loading && (
-        <View style={styles.center}>
-          <MaterialCommunityIcons
-            name="calendar-remove-outline"
-            size={27}
-            color="black"
-          />
-          <Text style={{ fontFamily: "popRegular", fontSize: 18 }}>
-            No Bookings
-          </Text>
-        </View>
-      )}
+      {!isLoading &&
+        (!Booked || Booked.length == 0) &&
+        (!Booking || Booking.length == 0) &&
+        !Loading && (
+          <View style={styles.center}>
+            <MaterialCommunityIcons
+              name="calendar-remove-outline"
+              size={27}
+              color="black"
+            />
+            <Text style={{ fontFamily: "popRegular", fontSize: 18 }}>
+              No Bookings
+            </Text>
+          </View>
+        )}
     </>
   );
 };

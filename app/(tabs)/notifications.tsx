@@ -17,6 +17,7 @@ import Colors from "@/constants/Colors";
 import { fetchUserData } from "@/features/userSlice";
 import CustomImage from "@/components/CustomImage";
 import { format } from "date-fns";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 interface User {
   _id: string;
@@ -105,7 +106,6 @@ const Page = () => {
     dispatch(fetchUserData());
   }, []);
 
-
   // Grouping Data by Date
   const groupByDate = (notifications: Booking[] | null): GroupedBooks => {
     const grouped: GroupedBooks = {};
@@ -127,7 +127,6 @@ const Page = () => {
     return grouped;
   };
   const groupedBooked = groupByDate(Booked);
-
 
   // Formating Date
   const formatDate = (dateString: string): string => {
@@ -151,7 +150,6 @@ const Page = () => {
 
     return format(date, formatString);
   };
-
 
   // route
   const handleClick = (book: Booking) => {
@@ -214,7 +212,7 @@ const Page = () => {
               </TouchableOpacity>
             ),
             headerShadowVisible: false,
-            headerShown: !Booked ? false : true,
+            headerShown: Loading && isLoading ? false : true,
             headerTitleStyle: {
               fontFamily: "popMedium",
             },
@@ -224,10 +222,14 @@ const Page = () => {
         />
 
         <View>
-          {!isLoading && !Loading && Booked && User &&(
+          {!isLoading && !Loading && Booked && User && (
             <View style={{ marginTop: 100 }}>
-              {Object.keys(groupedBooked).map((dateKey) => (
-                <View key={dateKey} style={{ alignItems: "center" }}>
+              {Object.keys(groupedBooked).map((dateKey, index) => (
+                <Animated.View
+                  entering={FadeIn.delay(200 * index)}
+                  key={dateKey}
+                  style={{ alignItems: "center" }}
+                >
                   <Text style={styles.dateText}>{formatDate(dateKey)}</Text>
                   <View style={styles.container}>
                     {groupedBooked[dateKey].map((book: any) => (
@@ -254,7 +256,7 @@ const Page = () => {
                       </TouchableOpacity>
                     ))}
                   </View>
-                </View>
+                </Animated.View>
               ))}
             </View>
           )}
@@ -268,7 +270,7 @@ const Page = () => {
           )}
         </View>
       </ScrollView>
-      {!Booked && !Loading && !isLoading && (
+      {Booked?.length == 0 && !Loading && !isLoading && (
         <View
           style={{
             backgroundColor: "#fff",
@@ -292,6 +294,7 @@ const Page = () => {
     </>
   );
 };
+
 
 const styles = StyleSheet.create({
   header: {

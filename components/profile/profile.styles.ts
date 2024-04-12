@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     gap: 10,
     borderBottomWidth: 0.4,
     borderColor: "#cacaca",
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   aboutheaderText: {
     fontFamily: "popSemibold",
@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
   UserCardsbottomtext: {
     fontFamily: "popRegular",
     fontSize: 13,
-    opacity: 0.6,
     width: "90%",
   },
   listingsheader: {
@@ -170,6 +169,20 @@ const styles = StyleSheet.create({
     }),
   },
   headerleftText: {
+    fontFamily: "popMedium",
+  },
+  btn: {
+    backgroundColor: Colors.maincolor,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "50%",
+    paddingVertical: 20,
+    borderRadius: 8,
+    marginTop: 10,
+    paddingHorizontal:30
+  },
+  btntext: {
+    color: "white",
     fontFamily: "popMedium",
   },
 });
