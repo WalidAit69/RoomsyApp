@@ -3,6 +3,7 @@ import userReducer from "@/features/userSlice";
 import bookingReducer from "@/features/userbookingsSlice";
 import RegisterReducer from "@/features/registrationTypeSlice";
 import placeReducer from "@/features/placeSlice";
+import userLocation from "@/features/userLocation";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     user: userReducer,
     bookings: bookingReducer,
     registrationtype: RegisterReducer,
+    loaction: userLocation,
   },
 });
 

@@ -1,4 +1,4 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 interface review {
@@ -49,7 +49,7 @@ interface Place {
 interface PlaceState {
   Place: Place[] | null;
   SlicedPlace: Place[] | null;
-  PlaceBycat: Place[] | null;
+  PlaceByLocation: Place[] | null;
   Loading: boolean;
   error: any | null;
 }
@@ -57,7 +57,7 @@ interface PlaceState {
 const initialState: PlaceState = {
   Place: null,
   SlicedPlace: null,
-  PlaceBycat: null,
+  PlaceByLocation: null,
   Loading: false,
   error: null,
 };
@@ -91,6 +91,9 @@ const placeSlice = createSlice({
     ChangeCategory(state, action) {
       state.SlicedPlace = action.payload;
     },
+    ChangeLocation(state, action) {
+      state.PlaceByLocation = action.payload;
+    },
   },
   extraReducers(builder) {
     builder.addCase(fetchPlaces.pending, (state) => {
@@ -114,6 +117,7 @@ const placeSlice = createSlice({
   },
 });
 
-export const { AddtoSlicedPlace, ChangeCategory } = placeSlice.actions;
+export const { AddtoSlicedPlace, ChangeCategory, ChangeLocation } =
+  placeSlice.actions;
 
 export default placeSlice.reducer;

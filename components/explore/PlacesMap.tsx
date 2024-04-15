@@ -1,31 +1,14 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "expo-router";
-import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import Carousel from "pinar";
+import { FontAwesome6 } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
 import UseToast from "@/widgets/Toast";
-
-interface InitialRegion {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-}
-
-interface review {
-  comment: string;
-  rating: number;
-  userId: string;
-  userName: string;
-  userPhoto: string;
-  _id: string;
-  createdAt: string;
-}
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchLocation } from "@/features/userLocation";
+import PlaceCard from "../PlaceCard";
 
 interface Place {
   _id: string;
@@ -57,54 +40,31 @@ interface Place {
   updatedAt: string;
   __v: number;
   likedBy: string[];
-  reviews: review[];
+  // reviews: review[];
   latitude: number;
   longitude: number;
 }
 
 const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
+  // getting user location with redux
+  const dispatch: AppDispatch = useDispatch();
+  const { location } = useSelector((state: RootState) => state.loaction);
+  useEffect(() => {
+    dispatch(fetchLocation());
+  }, []);
+
   // refs
-  const router = useRouter();
   const mapRef = useRef<MapView>(null);
 
   // data
-  const [errorMsg, setErrorMsg] = useState("");
-  const [initialRegion, setinitialRegion] = useState<InitialRegion>();
   const [SelectedPlace, setSelectedPlace] = useState<Place>();
-
-  // Getting user location
-  useEffect(() => {
-    const getCurrentLocation = async () => {
-      try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-        const initialRegion = {
-          latitude: location ? location?.coords.latitude : 33.58831,
-          longitude: location ? location?.coords.longitude : -7.61138,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        };
-
-        setinitialRegion(initialRegion);
-      } catch (error) {
-        console.error("Error getting current location:", error);
-      }
-    };
-
-    getCurrentLocation();
-  }, []);
 
   // handle Location Button
   const onLocationClicked = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    if (initialRegion) {
-      mapRef.current?.animateToRegion(initialRegion);
+    if (location) {
+      mapRef.current?.animateToRegion(location);
     } else {
       UseToast({ msg: "Location disabled" || "Location disabled" });
     }
@@ -121,7 +81,7 @@ const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
         ref={mapRef}
         style={styles.map}
         showsUserLocation
-        initialRegion={initialRegion}
+        initialRegion={location}
         showsMyLocationButton={false}
       >
         {AllPlaces &&
@@ -145,58 +105,11 @@ const PlacesMap = ({ AllPlaces }: { AllPlaces: Place[] | null }) => {
       </MapView>
 
       {SelectedPlace && (
-        <Animated.View entering={FadeInDown} style={{ alignItems: "center" }}>
-          <View style={styles.card}>
-            <TouchableOpacity
-              onPress={() => router.push(`/listing/${SelectedPlace._id}`)}
-            >
-              <Carousel
-                showsControls={false}
-                autoplay={true}
-                autoplayInterval={3000}
-                loop
-                style={styles.cardimg}
-                dotStyle={styles.dots}
-                activeDotStyle={styles.activedot}
-                dotsContainerStyle={styles.dotscontainer}
-              >
-                {SelectedPlace.images.slice(0, 5).map((image, index) => (
-                  <Animated.Image
-                    key={index}
-                    source={{
-                      uri: image.includes("https://")
-                        ? image
-                        : "https://roomsy-v3-server.vercel.app/server/routes/uploads/" +
-                          image,
-                    }}
-                    resizeMode="cover"
-                    style={styles.cardimg}
-                  />
-                ))}
-              </Carousel>
-              <TouchableOpacity
-                style={styles.cardcancel}
-                onPress={() => setSelectedPlace(undefined)}
-              >
-                <AntDesign
-                  name="closecircleo"
-                  size={24}
-                  color={Colors.maincolor}
-                />
-              </TouchableOpacity>
-            </TouchableOpacity>
-
-            <View style={styles.cardtextcontainer}>
-              <Text style={styles.cardcity}>
-                {SelectedPlace?.city}, {SelectedPlace?.country}
-              </Text>
-              <Text style={styles.cardtype}>{SelectedPlace?.type}</Text>
-              <Text style={styles.cardprice}>
-                ${SelectedPlace?.price}/night
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
+        <PlaceCard
+          SelectedPlace={SelectedPlace}
+          setSelectedPlace={setSelectedPlace}
+          isMap={true}
+        />
       )}
 
       <TouchableOpacity

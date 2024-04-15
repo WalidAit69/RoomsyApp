@@ -11,6 +11,7 @@ import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { AntDesign, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import Bars from "@/widgets/Bars";
 
 // categories list
 const categories = [
@@ -103,7 +104,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             </View>
 
             <TouchableOpacity>
-              <Ionicons name="options-outline" size={23} color="black" />
+              <Bars/>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

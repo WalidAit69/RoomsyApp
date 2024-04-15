@@ -125,8 +125,6 @@ const PlacesBottomSheet = ({
           } else {
             dispatch(AddtoSlicedPlace(slicedData));
           }
-        } else {
-          console.error("AllPlaces is not an array");
         }
       } catch (error) {
         console.log(error);
@@ -182,10 +180,7 @@ const PlacesBottomSheet = ({
               ref={listRef}
               data={AllPlaces}
               renderItem={({ item }) => (
-                <PlacesLg
-                  place={item}
-                  Loading={Loading}
-                />
+                <PlacesLg place={item} Loading={Loading} />
               )}
               keyExtractor={(place: Place) => place._id}
               showsVerticalScrollIndicator={false}
